@@ -8,37 +8,41 @@ module.exports = exports = function(app, db) {
     var contentHandler = new ContentHandler(db);
 
     // Middleware to see if a user is logged in
-    app.use(sessionHandler.isLoggedInMiddleware);
+    app.use(sessionHandler.isLoggedInMiddleware);  
 
-    // The main page of the blog
+    // Entries GET
     app.get('/', contentHandler.displayMainPage);
+    app.get('/institutions', contentHandler.displayInstitutions);
+    // app.get('/species', contentHandler.displaySpecies);
+    // app.get('/collectors', contentHandler.displayCollectors);
+    // app.get('/tagged_fishes', contentHandler.displayTaggedFishes);
+    // app.get('/users', contentHandler.displayUsers);
+    // app.get('/mon_collectors', contentHandler.displayMonCollectors);
+    // app.get('/mon_activities', contentHandler.displayMonActivities);
+    // app.get('/profile', contentHandler.displayProfile);
 
-    // The main page of the blog, filtered by tag
-    app.get('/tag/:tag', contentHandler.displayMainPageByTag);
+    // ##### GET for add_ *forms
+    app.get('/add_institutions', contentHandler.displayAddInstitutions);
+    // app.get('/add_', contentHandler.displayAdd);
+    // app.get('/add_', contentHandler.displayAdd);
+    // app.get('/add_', contentHandler.displayAdd);
+    // app.get('/add_', contentHandler.displayAdd);
 
-    // A single post, which can be commented on
-    app.get("/post/:permalink", contentHandler.displayPostByPermalink);
-    app.post('/newcomment', contentHandler.handleNewComment);
-    app.get("/post_not_found", contentHandler.displayPostNotFound);
 
-    // Displays the form allowing a user to add a new post. Only works for logged in users
-    app.get('/newpost', contentHandler.displayNewPostPage);
-    app.post('/newpost', contentHandler.handleNewPost);
+    // Entries POST
+    app.post('/add_institutions', contentHandler.handleAddInstitutions);
+    // app.post('/add_species', contentHandler.handleAddSpecies);
+    // app.post('/add_collectors', contentHandler.handleAddCollectors);
+    // app.post('/add_tagged_fishes', contentHandler.handleAddTaggedFishes);
+    // app.post('/add_users', contentHandler.handleAddUsers);
 
-    // Login form
-    app.get('/login', sessionHandler.displayLoginPage);
+
+    // Authentication
     app.post('/login', sessionHandler.handleLoginRequest);
-
-    // Logout page
     app.get('/logout', sessionHandler.displayLogoutPage);
 
-    // Welcome page
-    app.get("/welcome", sessionHandler.displayWelcomePage);
-
-    // Signup form
-    app.get('/signup', sessionHandler.displaySignupPage);
-    app.post('/signup', sessionHandler.handleSignup);
 
     // Error handling middleware
     app.use(ErrorHandler);
+
 }

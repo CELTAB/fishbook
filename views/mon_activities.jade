@@ -1,0 +1,46 @@
+extends layout
+
+block scripts
+    script(src='/socket.io/socket.io.js')
+    script(type='text/javascript').
+        var socket = io.connect('http://192.168.0.126:3000/');
+
+        socket.on('connect', function(data){
+            console.log("Connected to Node.js Server");            
+            socket.emit('subscribe', {channel:'realtime'});
+        });
+
+        socket.on('rfiddata', function (data) {
+            $('#tableBody').prepend(data.htmlRow);
+            $('#rfidtable tr:last').remove();
+        });
+
+        socket.on('info', function (data) {
+            console.log('Info: ', data);            
+        });
+ 
+
+block stylesheets
+  link(href="/css/style.css" rel="stylesheet")
+
+block content
+  h1.starter-template= title
+  
+  div.container-fluid.highlight
+    div.row-fluid.starter-template
+    div(class="span-6")
+        table(id="rfidtable" class="table")
+            thead
+                tr
+                    th Collector ID
+                    th Antena ID
+                    th PIT TAG
+                    th Date & Time
+            tbody(id="tableBody")
+            -var jsonArray = JSON.parse(rfiddata_list)
+            for rfiddata in jsonArray
+                tr 
+                    td= rfiddata.idcollectorpoint
+                    td= rfiddata.idantena
+                    td= rfiddata.identificationcode
+                    td= (new Date(rfiddata.datetime)).toISOString().replace(/T/, ' ').replace(/\..+/, '')

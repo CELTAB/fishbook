@@ -10,34 +10,35 @@ function InstitutionsDAO(db) {
 
     var institutions = db.collection("institutions");
 
-    this.insertEntry = function (name, lat, lon, logo, callback) {
+    this.add = function (name, logo, callback) {
         "use strict";
         
         var institution = {"name": name,
-                "place": {'lat':lat, 
-                        'lon':lon},
                 "logo": logo,
                 "date": new Date()}
 
         institutions.insert(institution, function (err, result) {
             "use strict";
 
-            if (err) return callback(err, null);
+            if (err) return callback(err);
 
             console.log("Inserted new institution");
-            callback(err, permalink);
+            callback(err);
         });
     }
 
-    this.getInstitutions = function(num, callback) {
+    this.getInstitutions = function(callback) {
         "use strict";
 
-        institutions.find().sort('name', 1).limit(num).toArray(function(err, items) {
+        institutions.find().sort('name', 1).toArray(function(err, items) {
             "use strict";
 
-            if (err) return callback(err, null);
+            if (err){ 
+                console.log("Error getInstitutions, " + err);                
+                return callback(err, null)
+            };
 
-            console.log("Found " + items.length + " posts");
+            console.log("Found " + items.length + " institutions");
 
             callback(err, items);
         });

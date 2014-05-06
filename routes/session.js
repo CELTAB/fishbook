@@ -37,13 +37,15 @@ function SessionHandler (db) {
             "use strict";
 
             if (err) {
-                if (err.no_such_user) {
-                    return res.render("login", {username:username, password:"", login_error:"No such user"});
-                }
-                else if (err.invalid_password) {
-                    return res.render("login", {username:username, password:"", login_error:"Invalid password"});
-                }
-                else {
+                if (err.no_such_user || err.invalid_password) {
+                    return res.render('index', {
+                title: 'FishBook Home',
+                username: req.username,
+                admin: '',
+                login_error: 'Invalid user or password.'
+            })
+                    //return res.render("/", {username: "", password:"", login_error:"Invalid user or password."});
+                }else {
                     // Some other kind of error
                     return next(err);
                 }
@@ -55,7 +57,7 @@ function SessionHandler (db) {
                 if (err) return next(err);
 
                 res.cookie('session', session_id);
-                return res.redirect('/welcome');
+                return res.redirect('/');
             });
         });
     }

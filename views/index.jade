@@ -1,0 +1,64 @@
+extends layout
+
+block stylesheets
+  link(href="/css/style.css" rel="stylesheet")
+
+block content
+  if username
+    div(class="navbar navbar-default navbar-fixed-top" role="navigation")
+        div(class="container")
+            div(class="navbar-header")
+              button(type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse")
+                span(class="sr-only">Toggle navigation)
+                span(class="icon-bar")
+                span(class="icon-bar")
+                span(class="icon-bar")
+              a(class="navbar-brand" href="/") FishBook
+            div(class="navbar-collapse collapse")              
+              ul(class="nav navbar-nav")                
+                // Dropdown Cadastros
+                li(class="dropdown")
+                  a(href="#" class="dropdown-toggle" data-toggle="dropdown") Entries
+                    b(class="caret")
+                  ul(class="dropdown-menu")
+                    li
+                      a(href="/institutions") Institutions
+                    li
+                      a(href="/species") Species
+                    li
+                      a(href="/collectors") Collectors
+                    li
+                      a(href="/taggedf") Tagged Fishes
+                    if admin
+                      li(class="divider")
+                      li(class="dropdown-header")
+                      li
+                        a(href="/users") Users
+                // Dropdown Monitoramento
+                li(class="dropdown")
+                  a(href="#" class="dropdown-toggle" data-toggle="dropdown") Monitoring
+                    b(class="caret")
+                  ul(class="dropdown-menu")
+                    li
+                      a(href="/mon_collectors") Collectors
+                    li
+                      a(href="/mon_activities") Activities
+              ul(class="nav navbar-nav navbar-right")
+                li
+                  a(href="/profile") 
+                    = username
+                li
+                  a(href="logout") Logout                
+  else
+    div(class="container")
+      form(class="form-signin" role="form" method="post" action="/login")
+        h2(class="form-signin-heading") Please sign in
+        if login_error
+          div(class="alert alert-warning fade in")
+            button(type="button" class="close" data-dismiss="alert" aria-hidden="true") × 
+            strong 
+                = login_error
+        input(type="text" class="form-control" id="username" name="username" placeholder="Email address" required autofocus)
+        input(type="password" class="form-control" id="password" name="password" placeholder="Password" required)        
+        button(class="btn btn-lg btn-primary btn-block" type="submit") Sign in
+
