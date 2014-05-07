@@ -1,11 +1,13 @@
 var InstitutionsDAO = require('../models/institutions').InstitutionsDAO
-  , sanitize = require('validator').sanitize; // Helper to sanitize form input
+  , sanitize = require('validator').sanitize, // Helper to sanitize form input
+    RFIDDataDAO = require('../models/RFIDData').RFIDDataDAO;
 
 /* The ContentHandler must be constructed with a connected db */
 function ContentHandler (db) {
     "use strict";
 
     var institutions = new InstitutionsDAO(db);
+    var rfidadata = new RFIDDataDAO(db);
 
     this.displayMainPage = function(req, res, next) {
         "use strict";
@@ -61,6 +63,24 @@ function ContentHandler (db) {
             return res.redirect("/institutions");
         });
     }
+
+
+    this.displayMonActivities = function(req, res, next) {
+        "use strict";
+
+        rfidadata.getRFIDData(20, function(err, result){
+            if(err) return next(err);
+            return res.render('mon_activities', {
+                title: 'FishBook - Collectors activities',
+                username: req.username,
+                admin: req.admin,                
+                login_error: '',
+                rfiddata_list: JSON.stringify(result)
+            });
+
+        });
+    }
+
 }
 
 module.exports = ContentHandler;

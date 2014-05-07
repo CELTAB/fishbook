@@ -5,7 +5,12 @@ var express = require('express')
   , routes = require('./routes'), // Routes for our application
   path = require('path');
 
-MongoClient.connect('mongodb://localhost:27017/blog', function(err, db) {
+// Socket.io
+var http = require('http');
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
+
+MongoClient.connect('mongodb://localhost:27017/rfidmonitor', function(err, db) {
     "use strict";
     if(err) throw err;
 
@@ -15,6 +20,9 @@ MongoClient.connect('mongodb://localhost:27017/blog', function(err, db) {
     app.set('views', path.join(__dirname, 'views'));
     app.use(express.static(path.join(__dirname, 'public')));
 
+    // Port
+    app.set('port', process.env.PORT || 8082);
+
     // Express middleware to populate 'req.cookies' so we can access cookies
     app.use(express.cookieParser());
 
@@ -22,13 +30,39 @@ MongoClient.connect('mongodb://localhost:27017/blog', function(err, db) {
     app.use(express.bodyParser());
 
     // When in dev print pretty html
-    app.configure('development', function(){      
+    if ('development' == app.get('env')) {
+      app.use(express.logger('dev'));
       app.locals.pretty = true;
-    });
+      
+      io.configure('development', function () {
+        io.disable('log');
+      });
+    }
 
     // Application routes
     routes(app, db);
 
-    app.listen(8082);
-    console.log('Express server listening on port 8082');
+    // Server Socket TCP/IP
+    var collectorPointServer = require('./core/CollectorPointServer')(io, db);
+
+    // SocketIO
+    io.sockets.on('connection', function (socket) {
+      
+      collectorPointServer.ServerEmitter.on('rfiddata', function (data) {
+        socket.emit('rfiddata',data);
+      });
+
+      socket.on('end', function (data) {
+        console.log('Disconnect: '+data);
+      });
+    });
+
+
+    server.listen(app.get('port'), function(){
+      console.log('Express server listening on port ' + app.get('port'));
+    });
+
+
+// Start listeting TCP/IP connections
+    collectorPointServer.start();
 });
