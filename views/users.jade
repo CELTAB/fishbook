@@ -1,0 +1,20 @@
+extends index
+
+block append content
+  div(class="container ")
+    div(class="row")
+      div(class="col-md-1")
+          a(class="btn btn-primary" href="/add_users") Add user
+    div(class="row")      
+      div(class="col-md-9")        
+        table(class="table")
+          thead
+            tr
+              th Username
+              th Type
+          tbody(id="tableBody")
+          -var jsonArray = JSON.parse(users)
+          for data in jsonArray
+            tr 
+              td= data._id
+              td= data.type

@@ -1,0 +1,19 @@
+extends index
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        form(role="form" method="post" action="add_users")
+          div(class="form-group")
+
+            label(for="userName") Username
+            input(type="text" class="form-control" id="userName" name="username")
+
+            label(for="userPassword") Password
+            input(type="password" class="form-control" id="userPassword" name="password")
+
+            label(for="userType") Type
+            input(type="text" class="form-control" id="userType" name="type")  
+
+          button(type="submit" class="btn btn-default") Submit

@@ -1,0 +1,24 @@
+extends index
+
+block append content
+  div(class="container ")
+    div(class="row")
+      div(class="col-md-1")
+          a(class="btn btn-primary" href="/add_collectors") Add collector
+    div(class="row")      
+      div(class="col-md-9")        
+        table(class="table")
+          thead
+            tr
+              th ID
+              th Name
+              th MAC
+              th Description
+          tbody(id="tableBody")
+          -var jsonArray = JSON.parse(collectors)
+          for data in jsonArray
+            tr 
+              td= data._id
+              td= data.name
+              td= data.mac
+              td= data.description

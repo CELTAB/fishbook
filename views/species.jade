@@ -1,0 +1,20 @@
+extends index
+
+block append content
+  div(class="container ")
+    div(class="row")
+      div(class="col-md-1")
+          a(class="btn btn-primary" href="/add_species") Add species
+    div(class="row")      
+      div(class="col-md-9")        
+        table(class="table")
+          thead
+            tr
+              th Specie
+              th Image
+          tbody(id="tableBody")
+          -var jsonArray = JSON.parse(species)
+          for data in jsonArray
+            tr 
+              td= data.name
+              td= data.image
