@@ -265,6 +265,49 @@ function ContentHandler (db) {
         });
     }
 
+    /* SEARCH RFIDS */
+
+    this.displaySearchRFIDs = function(req, res, next){
+        "use strict";
+
+        return res.render('search_rfids', {
+                title: 'FishBook - Search/Export Data',
+                username: req.username,
+                admin: req.admin,                
+                login_error: '',
+                result_list: JSON.stringify([])
+        });
+
+    };
+
+    this.handleSearchRFIDs = function(req, res, next) {
+        "use strict";
+
+        var query = new Object;
+
+        var collector_id = parseInt(req.body.collector_id);
+        var tag = parseInt(req.body.tag);
+        
+        if(collector_id)
+            query.idcollectorpoint = collector_id;
+        if(tag)
+            query.identificationcode = tag;
+
+
+        // even if there is no logged in user, we can still post a comment
+        rfidadata.findRFIDData(query, null, null, null, function(err,result){
+            if(err) return next(err);
+
+            return res.render('search_rfids', {
+                title: 'FishBook - Search/Export Data',
+                username: req.username,
+                admin: req.admin,
+                login_error: '',
+                result_list: JSON.stringify(result)
+            });
+        });
+    }
+
 
     this.displayMonActivities = function(req, res, next) {
         "use strict";

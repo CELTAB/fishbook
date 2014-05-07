@@ -45,7 +45,37 @@ function RFIDDataDAO(db) {
 
             if (err) return callback(err, null);
 
-            console.log("Found " + items.length + " posts");
+            console.log("Found " + items.length + " RFIDs");
+
+            callback(err, items);
+        });
+    }
+
+    this.findRFIDData = function(query, sortBy, sortOrder, limit, callback) {
+        "use strict";
+
+        console.log("Query arrived: "+ JSON.stringify(query));
+
+        var cursor =  RFIDData.find(query);
+
+        if(sortBy){
+        	if(sortOrder)	
+        		cursor.sort(sortBy, sortOrder);
+        	else
+        		cursor.sort(sortBy, 1);
+        }
+
+        if(limit)
+        	cursor.limit(limit);
+        
+
+        cursor.toArray(function(err, items) {
+            "use strict";
+
+            if (err) return callback(err, null);
+
+            console.log("Found " + items.length + " RFIDs");
+            console.log(JSON.stringify(items));
 
             callback(err, items);
         });
