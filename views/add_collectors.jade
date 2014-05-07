@@ -1,0 +1,22 @@
+extends index
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        form(role="form" method="post" action="add_collectors")
+          div(class="form-group")
+
+            label(for="collectorsID") ID
+            input(type="text" class="form-control" id="collectorsID" name="_id")
+
+            label(for="collectorsName") Name
+            input(type="text" class="form-control" id="collectorsName" name="name")
+
+            label(for="collectorsMAC") MAC
+            input(type="text" class="form-control" id="collectorsMAC" name="mac")
+
+            label(for="collectorDesc") Description
+            input(type="text" class="form-control" id="collectorDesc" name="description")
+
+          button(type="submit" class="btn btn-default") Submit

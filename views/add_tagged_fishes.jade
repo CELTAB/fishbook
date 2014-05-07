@@ -1,0 +1,37 @@
+extends index
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        form(role="form" method="post" action="add_tagged_fishes")
+          div(class="form-group")
+
+            label(for="taggedSpecie") Specie
+            input(type="text" class="form-control" id="taggedSpecie" name="specie")
+
+            label(for="taggedPIT") PIT Tag
+            input(type="text" class="form-control" id="taggedPIT" name="pit_tag")
+
+            label(for="taggedCap") Capture Local
+            input(type="text" class="form-control" id="taggedCap" name="capture_local")
+
+            label(for="taggedRel") Release Local
+            input(type="text" class="form-control" id="taggedRel" name="release_local")
+
+            label(for="taggedTotalLen") Total Length
+            input(type="text" class="form-control" id="taggedTotalLen" name="total_length")
+
+            label(for="taggedDefLen") Default Length
+            input(type="text" class="form-control" id="taggedDefLen" name="default_length")
+
+            label(for="taggedWeight") Weight
+            input(type="text" class="form-control" id="taggedWeight" name="weight")
+
+            label(for="taggedSex") Sex
+            input(type="text" class="form-control" id="taggedSex" name="sex")
+
+            label(for="taggedObs") Observation
+            input(type="text" class="form-control" id="taggedObs" name="observation")
+
+          button(type="submit" class="btn btn-default") Submit

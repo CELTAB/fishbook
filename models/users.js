@@ -13,7 +13,7 @@ function UsersDAO(db) {
 
     var users = db.collection("users");
 
-    this.addUser = function(username, password, email, callback) {
+    this.add = function(username, password, type, callback) {
         "use strict";
 
         // Generate password hash
@@ -21,23 +21,32 @@ function UsersDAO(db) {
         var password_hash = bcrypt.hashSync(password, salt);
 
         // Create user document
-        var user = {'_id': username, 'password': password_hash};
+        var user = {
+            '_id': username, 
+            'password': password_hash,
+            'type' : type
+        };
 
-        // Add email if set
-        if (email != "") {
-            user['email'] = email;
-        }
-
-        // TODO: hw2.3
         users.insert(user, function (err, result) {
             "use strict";
 
-            if (!err) {
-                console.log("Inserted new user");
-                return callback(null, result[0]);
-            }
+            if(err) return callback(err);
 
-            return callback(err, null);
+            console.log("Inserted new user.");
+            callback(err);
+        });
+    }
+
+    this.getUsers = function(callback){
+        "use strict";
+
+        users.find().sort("username", 1).toArray(function(err, items){
+            if(err){
+                console.log("Error getUsers, " + err);
+                return callback(err, null);
+            }
+            console.log("Found " + items.length + " users");            
+            callback(err, items);
         });
     }
 

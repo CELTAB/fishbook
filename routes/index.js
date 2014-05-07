@@ -13,28 +13,28 @@ module.exports = exports = function(app, db) {
     // Entries GET
     app.get('/', contentHandler.displayMainPage);
     app.get('/institutions', contentHandler.displayInstitutions);
-    // app.get('/species', contentHandler.displaySpecies);
-    // app.get('/collectors', contentHandler.displayCollectors);
-    // app.get('/tagged_fishes', contentHandler.displayTaggedFishes);
-    // app.get('/users', contentHandler.displayUsers);
+    app.get('/species', contentHandler.displaySpecies);
+    app.get('/collectors', contentHandler.displayCollectors);
+    app.get('/tagged_fishes', contentHandler.displayTaggedFishes);
+    app.get('/users', contentHandler.displayUsers);
     // app.get('/mon_collectors', contentHandler.displayMonCollectors);
     app.get('/mon_activities', contentHandler.displayMonActivities);
     // app.get('/profile', contentHandler.displayProfile);
 
     // ##### GET for add_ *forms
     app.get('/add_institutions', contentHandler.displayAddInstitutions);
-    // app.get('/add_', contentHandler.displayAdd);
-    // app.get('/add_', contentHandler.displayAdd);
-    // app.get('/add_', contentHandler.displayAdd);
-    // app.get('/add_', contentHandler.displayAdd);
+    app.get('/add_species', contentHandler.displayAddSpecies);
+    app.get('/add_collectors', contentHandler.displayAddCollectors);
+    app.get('/add_tagged_fishes', contentHandler.displayAddTaggedFishes);
+    app.get('/add_users', contentHandler.displayAddUsers);
 
 
     // Entries POST
     app.post('/add_institutions', contentHandler.handleAddInstitutions);
-    // app.post('/add_species', contentHandler.handleAddSpecies);
-    // app.post('/add_collectors', contentHandler.handleAddCollectors);
-    // app.post('/add_tagged_fishes', contentHandler.handleAddTaggedFishes);
-    // app.post('/add_users', contentHandler.handleAddUsers);
+    app.post('/add_species', contentHandler.handleAddSpecies);
+    app.post('/add_collectors', contentHandler.handleAddCollectors);
+    app.post('/add_tagged_fishes', contentHandler.handleAddTaggedFishes);
+    app.post('/add_users', contentHandler.handleAddUsers);
 
 
     // Authentication
