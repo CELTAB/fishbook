@@ -31,13 +31,13 @@ function RFIDDataDAO(db) {
 					return console.log(err);
 				}
 				callback(true);
-				return console.log('Insert successful: id = ' + rfidData._id);
+				return console.log('Insert successful: ObjectId = ' + rfidData._id);
 			});
 		}
 	};
 
     this.getRFIDData = function(num, callback) {
-        "use strict";
+        "use strict";      
 
         RFIDData.find().sort('date', -1).limit(num).toArray(function(err, items) {
             "use strict";

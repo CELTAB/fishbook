@@ -77,17 +77,19 @@ module.exports = function(SocketIO, db){
 				RFIDData_MongoDB.insert(message.data, function(success){
 					if(success){
 						var md5hash = message.data.datasummary.md5diggest;
+						console.log("Object inserted: " + JSON.stringify(message.data.datasummary));
 						console.log("Hash inserted: " + md5hash);
 
 						var ack_data = {
 										type: 'ACK-DATA',
 										data: {
-											md5diggest: md5hash
+											md5diggest: [md5hash]
 										},
 										datetime: (new Date).toISOString()
 									   };
-						socket.write(JSON.stringify(ack_data));
-						
+						console.log("Sending ACK-DATA: " + JSON.stringify(ack_data));
+						socket.write(buildMessage(JSON.stringify(ack_data)));
+
 						var rfidArray = message.data.datasummary.data;
 						for(var key in rfidArray){
 							var rfid = rfidArray[key];
