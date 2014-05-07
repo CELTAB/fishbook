@@ -38,8 +38,7 @@ function InstitutionsDAO(db) {
                 return callback(err, null)
             };
 
-            console.log("Found " + items.length + " institutions");
-
+            console.log("Found " + items.length + " institutions");            
             callback(err, items);
         });
     }

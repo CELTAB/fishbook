@@ -1,16 +1,17 @@
 extends index
 
-block content
+block append content
   div(class="container")
-    div("span-6")
-      form(role="form" method="post" action="add_institutions")
-        div(class="form-group")
-          label(for="instName") Name
-          input(type="text" class="form-control" id="instName" name="name")
+    div(class="row")
+      div(class="col-md-6")
+        form(role="form" method="post" action="add_institutions")
+          div(class="form-group")
+            label(for="instName") Name
+            input(type="text" class="form-control" id="instName" name="name")
 
 
-        div(class="form-group")
-          label(for="logoInst") Logo file
-          input(type="file" id="logoInst" name="logo")
+          div(class="form-group")
+            label(for="logoInst") Logo file
+            input(type="file" id="logoInst" name="logo")
 
-        button(type="submit" class="btn btn-default") Submit
+          button(type="submit" class="btn btn-default") Submit

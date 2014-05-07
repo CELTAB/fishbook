@@ -21,6 +21,11 @@ MongoClient.connect('mongodb://localhost:27017/blog', function(err, db) {
     // Express middleware to populate 'req.body' so we can access POST variables
     app.use(express.bodyParser());
 
+    // When in dev print pretty html
+    app.configure('development', function(){      
+      app.locals.pretty = true;
+    });
+
     // Application routes
     routes(app, db);
 

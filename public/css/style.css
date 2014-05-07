@@ -1,7 +1,4 @@
-body {
-  padding-top: 0px;
-}
-.starter-template {
+.centralized {
   padding: 5px 15px;
   text-align: center;
 }
@@ -40,9 +37,8 @@ body {
 	}
 }
 
-
 body {
-  padding-top: 40px;
+  padding-top: 80px;
   padding-bottom: 40px;
   background-color: #eee;
 }
@@ -80,4 +76,13 @@ body {
   margin-bottom: 10px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+
+body {
+  min-height: 2000px;
+}
+
+.navbar-static-top {
+  margin-bottom: 19px;
 }

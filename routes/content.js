@@ -24,13 +24,12 @@ function ContentHandler (db) {
 
         institutions.getInstitutions(function(err, result){
             if(err) return next(err);
-            
             return res.render('institutions', {
                 title: 'FishBook - Institutions',
                 username: req.username,
                 admin: req.admin,                
                 login_error: '',
-                institutions: result
+                institutions: JSON.stringify(result)
             });
 
         });

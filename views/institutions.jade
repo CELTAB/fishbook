@@ -1,17 +1,20 @@
 extends index
 
-block content
-  div(class="container")
-    a(class="btn btn-lg btn-primary btn-block" href="/add_institutions") Add institution
-    div(class="span-6")
-      table(class="table")
-        thead
-          tr
-            th Name
-            th Thumbnail
-        tbody(id="tableBody")
-        if institutions != 0
+block append content
+  div(class="container ")
+    div(class="row")
+      div(class="col-md-1")
+          a(class="btn btn-primary" href="/add_institutions") Add institution
+    div(class="row")      
+      div(class="col-md-9")        
+        table(class="table")
+          thead
+            tr
+              th Name
+              th Thumbnail
+          tbody(id="tableBody")
           -var jsonArray = JSON.parse(institutions)
           for data in jsonArray
-            tr td= data.name
+            tr 
+              td= data.name
               td= data.logo
