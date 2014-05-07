@@ -3,7 +3,7 @@ module.exports = function(SocketIO, db){
     var collectorPoint = require('../models/CollectorPoint');
     var RFIDDataDAO = require('../models/RFIDData').RFIDDataDAO;
 
-    var RFID_MongoDB = new RFIDDataDAO(db)
+    var RFIDData_MongoDB = new RFIDDataDAO(db)
 
 	var net = require('net');
 	var server = net.createServer();
@@ -74,11 +74,20 @@ module.exports = function(SocketIO, db){
 			// When the client sends data
 			if(message.type == "DATA"){
 				console.log(JSON.stringify(message.data));
-				RFID_MongoDB.insert(message.data, function(success){
+				RFIDData_MongoDB.insert(message.data, function(success){
 					if(success){
 						var md5hash = message.data.datasummary.md5diggest;
 						console.log("Hash inserted: " + md5hash);
 
+						var ack_data = {
+										type: 'ACK-DATA',
+										data: {
+											md5diggest: md5hash
+										},
+										datetime: (new Date).toISOString()
+									   };
+						socket.write(JSON.stringify(ack_data));
+						
 						var rfidArray = message.data.datasummary.data;
 						for(var key in rfidArray){
 							var rfid = rfidArray[key];

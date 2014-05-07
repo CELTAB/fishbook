@@ -11,8 +11,7 @@ function RFIDDataDAO(db) {
 
     var RFIDData = db.collection('rfiddata');
 
-
-	var insert = function(data, callback){
+	this.insert = function(data, callback){
 		var rfidArray = data.datasummary.data;
 
 		for(var key in rfidArray){
