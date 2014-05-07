@@ -22,7 +22,8 @@ function RFIDDataDAO(db) {
 	            idantena: rfid.idantena,
 	            identificationcode: rfid.identificationcode,
 				applicationcode: rfid.applicationcode,
-	            datetime: Date(rfid.datetime)
+	            datetime: Date(rfid.datetime),
+	            md5hash: data.datasummary.md5diggest
 			};
 
 			RFIDData.insert(rfidData, function(err){
