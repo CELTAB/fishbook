@@ -4,14 +4,14 @@ block append content
   div(class="container")
     div(class="row")
       div(class="col-md-6")
-        form(role="form" method="post" action="add_institutions")
+        form(role="form" method="post" action="add_institutions" enctype="multipart/form-data")
           div(class="form-group")
             label(for="instName") Name
             input(type="text" class="form-control" id="instName" name="name")
 
 
           div(class="form-group")
-            label(for="logoInst") Logo file
-            input(type="file" id="logoInst" name="logo")
+            label(for="idImg") Logo file
+            input(type="file" id="idImg" name="imgSrc")
 
           button(type="submit" class="btn btn-default") Submit

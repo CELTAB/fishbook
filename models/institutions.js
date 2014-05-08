@@ -10,11 +10,11 @@ function InstitutionsDAO(db) {
 
     var institutions = db.collection("institutions");
 
-    this.add = function (name, logo, callback) {
+    this.add = function (name, image_path, callback) {
         "use strict";
         
         var institution = {"name": name,
-                "logo": logo,
+                "image_path": image_path,
                 "date": new Date()}
 
         institutions.insert(institution, function (err, result) {

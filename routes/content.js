@@ -4,7 +4,9 @@ var InstitutionsDAO = require('../models/institutions').InstitutionsDAO
     SpeciesDAO = require('../models/species').SpeciesDAO,
     CollectorsDAO = require('../models/collectors').CollectorsDAO,
     TaggedFishesDAO = require('../models/tagged_fishes').TaggedFishesDAO,
-    UsersDAO = require('../models/users').UsersDAO;
+    UsersDAO = require('../models/users').UsersDAO,
+    ImagesDAO = require('../models/images').ImagesDAO,
+    fs = require('fs');
 
 /* The ContentHandler must be constructed with a connected db */
 function ContentHandler (db) {
@@ -16,6 +18,35 @@ function ContentHandler (db) {
     var collectors = new CollectorsDAO(db);
     var tagged_fishes = new TaggedFishesDAO(db);
     var users = new UsersDAO(db);
+    var images = new ImagesDAO(db);
+
+    var insertImage = function(imgFile, callback){
+        var uniqueFileName = imgFile.path + "_" + (new Date).toISOString()
+
+        var fl = fs.createReadStream(imgFile.path);
+
+        console.log("FL opened! - " + uniqueFileName);
+        fl.pipe(fs.createWriteStream(__dirname+'/public/uploads/images/'+uniqueFileName));
+
+        // name, image_path, type, size, 
+        var file = { 
+                     name: uniqueFileName,
+                     image_path: imgFile.path,
+                     type: imgFile.type,
+                     size: imgFile.size,
+                     insert_date: (new Date).toISOString()
+                   };
+
+        images.add(file, function(err){
+            if(err) {
+                console.log("Error upload file: " + err);
+                callback(null);
+                return next(err);
+            }
+            callback(uniqueFileName);
+        });
+    }
+
 
     this.displayMainPage = function(req, res, next) {
         "use strict";
@@ -34,6 +65,7 @@ function ContentHandler (db) {
 
         institutions.getInstitutions(function(err, result){
             if(err) return next(err);
+
             return res.render('institutions', {
                 title: 'FishBook - Institutions',
                 username: req.username,
@@ -41,7 +73,6 @@ function ContentHandler (db) {
                 login_error: '',
                 institutions: JSON.stringify(result)
             });
-
         });
     }
 
@@ -60,12 +91,19 @@ function ContentHandler (db) {
     this.handleAddInstitutions = function(req, res, next) {
         "use strict";
         var name = req.body.name;
-        var logo = req.body.logo;      
 
-        // even if there is no logged in user, we can still post a comment
-        institutions.add(name, logo, function(err) {
+        var imgName = "";
+
+        console.log(req.files.imgSrc);
+        insertImage(req.files.imgSrc, function(imageName) {
             "use strict";
 
+            if(imageName){
+                imgName = imageName;
+            }
+        });        
+
+        institutions.add(name, imgName, function(err) {
             if (err) return next(err);
 
             return res.redirect("/institutions");
@@ -361,10 +399,11 @@ function ContentHandler (db) {
     }
 
     this.handleImport = function(req, res, next) {
-        "use strict";
+        "use strict";   
 
-        var file = req.body.file;
         console.log(req.files.import_file);
+
+
 
         res.redirect("/import");
     }

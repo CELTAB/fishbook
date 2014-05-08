@@ -17,4 +17,5 @@ block append content
           for data in jsonArray
             tr 
               td= data.name
-              td= data.logo
+              td 
+                img(src=data.image_path)
