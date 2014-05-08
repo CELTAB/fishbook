@@ -364,7 +364,7 @@ function ContentHandler (db) {
         "use strict";
 
         var file = req.body.file;
-        console.log(req.import_file.path);
+        console.log(req.files.import_file);
 
         res.redirect("/import");
     }
