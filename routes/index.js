@@ -19,8 +19,9 @@ module.exports = exports = function(app, db) {
     app.get('/users', contentHandler.displayUsers);
     // app.get('/mon_collectors', contentHandler.displayMonCollectors);
     app.get('/mon_activities', contentHandler.displayMonActivities);
-    //app.get('/profile', contentHandler.displayProfile);
+    app.get('/profile', contentHandler.displayProfile);
     app.get('/search_rfids', contentHandler.displaySearchRFIDs);
+    app.get('/import', contentHandler.displayImport);
 
     // ##### GET for add_ *forms
     app.get('/add_institutions', contentHandler.displayAddInstitutions);
@@ -36,6 +37,8 @@ module.exports = exports = function(app, db) {
     app.post('/add_tagged_fishes', contentHandler.handleAddTaggedFishes);
     app.post('/add_users', contentHandler.handleAddUsers);
     app.post('/search_rfids', contentHandler.handleSearchRFIDs);
+    app.post('/profile', contentHandler.handleProfile);
+    app.post('/import', contentHandler.handleImport);
 
 
     // Authentication

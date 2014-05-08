@@ -59,14 +59,19 @@ function RFIDDataDAO(db) {
         var cursor =  RFIDData.find(query);
 
         if(sortBy){
-        	if(sortOrder)	
+            console.log(sortBy);
+        	if(sortOrder){	
         		cursor.sort(sortBy, sortOrder);
+                console.log(sortOrder);
+            }
         	else
         		cursor.sort(sortBy, 1);
         }
 
-        if(limit)
+        if(limit){
         	cursor.limit(limit);
+            console.log(limit);
+        }
         
 
         cursor.toArray(function(err, items) {

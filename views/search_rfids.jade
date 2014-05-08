@@ -13,13 +13,21 @@ block append content
             label(for="tag") TAG
             input(type="text" class="form-control" id="tag" name="tag")
 
-            label(for="endDate") Start Date
-            input(type="text" class="form-control" id="endDate" name="start_date")
+            label(for="sortBy") Sort By
+            select(name="sortBy" id="sortBy" class="form-control")
+              option(value="")
+              option(value="idcollectorpoint") Collector
+              option(value="identificationcode") TAG
+              option(value="datetime") Date
 
-            label(for="startDate") End Date
-            input(type="text" class="form-control" id="startDate" name="end_date")
+            label(for="sortOrder") Order
+            select(name="sortOrder" id="sortOrder" class="form-control")
+              option(value="")
+              option(value="1") Ascending
+              option(value="-1") Descending
 
-            input(type="selector" class="form-control" id="saf" name="asfd")
+            label(for="limit") Limit of results
+            input(type="text" class="form-control" id="limit" name="results_limit")
 
           button(type="submit" class="btn btn-default") Search
     if result_list

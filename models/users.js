@@ -37,6 +37,32 @@ function UsersDAO(db) {
         });
     }
 
+    this.update = function(username, name, email, photo, callback) {
+        "use strict";
+
+        var query = {
+            '_id': username
+        };
+
+        var set = new Object;
+        set['name'] = name;
+        set['email'] = email;
+        if(photo)
+            set['photo'] = photo;
+
+        var update = new Object;
+        update['$set'] = set;
+
+        users.update(query, update, function (err, updated) {
+            "use strict";
+
+            if(err) return callback(err);
+
+            console.log("Updated the user.");
+            callback(err);
+        });
+    }
+
     this.getUsers = function(callback){
         "use strict";
 
@@ -47,6 +73,22 @@ function UsersDAO(db) {
             }
             console.log("Found " + items.length + " users");            
             callback(err, items);
+        });
+    }
+
+    this.getUser = function(username, callback){
+        "use strict";
+
+        var query = new Object;
+        query._id = username;
+
+        users.findOne(query, function(err, doc){
+            if(err){
+                console.log("Error getUser, " + err);
+                return callback(err, null);
+            }
+            console.log("User found.");            
+            callback(err, doc);
         });
     }
 
