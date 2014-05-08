@@ -1,0 +1,36 @@
+extends index
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        form(role="form" method="post" action="profile")
+          div(class="form-group")
+
+            -var name = ''
+            if profile.name 
+              -name= profile.name
+
+            -var email = ''
+            if profile.email 
+              -email= profile.email
+
+            -var photo = ''
+            if profile.photo 
+              -photo= profile.photo
+              
+            div(class="row")
+              div(class="col-xs-2")
+                label(for="userName") Name
+                input(type="text" class="form-control" id="userName" name="name" value="#{name}")
+
+              div(class="col-xs-3")
+                label(for="userEmail") E-mail
+                input(type="text" class="form-control" id="userEmail" name="email"  value="#{email}")
+
+              div(class="col-xs-5")
+                label(for="userPhoto") Photo
+                input(type="file" id="userPhoto" name="photo")
+                p #{photo}
+
+          button(type="submit" class="btn btn-default") Update

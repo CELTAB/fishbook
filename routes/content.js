@@ -265,6 +265,110 @@ function ContentHandler (db) {
         });
     }
 
+    this.displayProfile = function(req, res, next) {
+        "use strict";
+
+        var username = req.username;
+
+        users.getUser(username, function(err, doc){
+            return res.render('profile', {
+                title: 'FishBook - User profile',
+                username: req.username,
+                admin: req.admin,                
+                login_error: '',
+                profile: doc
+            });
+        });       
+
+        
+    }
+
+    this.handleProfile = function(req, res, next) {
+        "use strict";
+        var username = req.username;
+        var name = req.body.name;    
+        var email = req.body.email;    
+        var photo = req.body.photo;
+
+        // even if there is no logged in user, we can still post a comment
+        users.update(username, name, email, photo, function(err) {
+            "use strict";
+
+            if (err) return next(err);
+
+            return res.redirect("/profile");
+        });
+    }
+
+    /* SEARCH RFIDS */
+
+    this.displaySearchRFIDs = function(req, res, next){
+        "use strict";
+
+        return res.render('search_rfids', {
+                title: 'FishBook - Search/Export Data',
+                username: req.username,
+                admin: req.admin,                
+                login_error: '',
+                result_list: JSON.stringify([])
+        });
+
+    };
+
+    this.handleSearchRFIDs = function(req, res, next) {
+        "use strict";
+
+        var query = new Object;
+
+        var collector_id = parseInt(req.body.collector_id);
+        var tag = parseInt(req.body.tag);
+        var sortBy = req.body.sortBy;
+        var sortOrder = parseInt(req.body.sortOrder);
+        var results_limit = parseInt(req.body.results_limit);
+
+        if(collector_id)
+            query.idcollectorpoint = collector_id;
+        if(tag)
+            query.identificationcode = tag;
+
+
+        // even if there is no logged in user, we can still post a comment
+        rfidadata.findRFIDData(query, sortBy, sortOrder, results_limit, function(err,result){
+            if(err) return next(err);
+
+            return res.render('search_rfids', {
+                title: 'FishBook - Search/Export Data',
+                username: req.username,
+                admin: req.admin,
+                login_error: '',
+                result_list: JSON.stringify(result)
+            });
+        });
+    }
+
+    /* IMPORT */
+
+    this.displayImport = function(req, res, next) {
+        "use strict";        
+
+        return res.render('import', {
+                title: 'FishBook - Import data',
+                username: req.username,
+                admin: req.admin,                
+                login_error: '',
+                status: ''
+        });
+    }
+
+    this.handleImport = function(req, res, next) {
+        "use strict";
+
+        var file = req.body.file;
+        console.log(req.import_file.path);
+
+        res.redirect("/import");
+    }
+
 
     this.displayMonActivities = function(req, res, next) {
         "use strict";
