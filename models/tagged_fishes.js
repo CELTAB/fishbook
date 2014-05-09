@@ -17,7 +17,7 @@ function TaggedFishesDAO(db) {
         
         var tagged_fish = {
             "species_id" : species_id,
-            "pit_tag" : pit_tag,
+            "pit_tag" : parseInt(pit_tag),
             "capture_local": capture_local,
             "release_local": release_local,
             "total_length": total_length,
@@ -54,6 +54,32 @@ function TaggedFishesDAO(db) {
         });
     }
 
+    
+
+    this.getTaggedFishesByPitTagSpeciesIdInstituionIdHash = function(pit_tag, callback) {
+        "use strict";
+
+        console.log('Find One: ' + pit_tag);
+        tagged_fishes.findOne({'pit_tag': parseInt(pit_tag)}, function(err, item) {
+            console.log('Find One: ' + pit_tag + ' - ' + JSON.stringify(item));
+        });
+
+        tagged_fishes.find({'pit_tag': parseInt(pit_tag)}, {'species_id': 1, 'institution_id': 1}, function(err, item) {
+            "use strict";
+
+            if (err){ 
+                console.log("Error getTaggedFishes, " + err);                
+                return callback(err, null)
+            };
+
+            console.log("PIT_TAG: " + JSON.stringify(item));
+
+            var hash = {};
+            hash[item.pit_tag] = {'species_id': item.species_id, 'institution_id': item.institution_id};
+
+            callback(err, hash);
+        });
+    }
     
 }
 

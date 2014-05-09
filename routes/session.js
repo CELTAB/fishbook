@@ -38,7 +38,7 @@ function SessionHandler (db) {
 
             if (err) {
                 if (err.no_such_user || err.invalid_password) {
-                    return res.render('index', {
+                    return res.render('home', {
                 title: 'FishBook Home',
                 username: req.username,
                 admin: '',

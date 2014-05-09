@@ -78,6 +78,7 @@ function SpeciesDAO(db){
             callback(err, hash);
         });
     }
+
 }
 
 module.exports.SpeciesDAO = SpeciesDAO;

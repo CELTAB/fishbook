@@ -3,7 +3,16 @@ module.exports = function(SocketIO, db){
     var collectorPoint = require('../models/CollectorPoint');
     var RFIDDataDAO = require('../models/RFIDData').RFIDDataDAO;
 
-    var RFIDData_MongoDB = new RFIDDataDAO(db)
+    var InstitutionsDAO = require('../models/institutions').InstitutionsDAO,
+    	SpeciesDAO = require('../models/species').SpeciesDAO,
+    	CollectorsDAO = require('../models/collectors').CollectorsDAO,
+    	TaggedFishesDAO = require('../models/tagged_fishes').TaggedFishesDAO;
+
+    var RFIDData_MongoDB = new RFIDDataDAO(db);
+    var institutions = new InstitutionsDAO(db);
+    var species = new SpeciesDAO(db);
+    var collectors = new CollectorsDAO(db);
+    var tagged_fishes = new TaggedFishesDAO(db);
 
 	var net = require('net');
 	var server = net.createServer();
@@ -77,7 +86,6 @@ module.exports = function(SocketIO, db){
 				RFIDData_MongoDB.insert(message.data, function(success){
 					if(success){
 						var md5hash = message.data.datasummary.md5diggest;
-						console.log("Object inserted: " + JSON.stringify(message.data.datasummary));
 						console.log("Hash inserted: " + md5hash);
 
 						var ack_data = {
@@ -90,17 +98,42 @@ module.exports = function(SocketIO, db){
 						console.log("Sending ACK-DATA: " + JSON.stringify(ack_data));
 						socket.write(buildMessage(JSON.stringify(ack_data)));
 
-						var rfidArray = message.data.datasummary.data;
-						for(var key in rfidArray){
-							var rfid = rfidArray[key];
-					
-							jade.renderFile('./views/fishrow.jade', {rfiddata: rfid}, function (err, html) {
-							  if (!err) 
-								serverEmitter.emit('rfiddata', { htmlRow: html} );	
-							  else throw err
-							});
 
-						}
+				        collectors.getCollectorsIdNameHash(function(err, collectors_hash){
+				            species.getSpeciesIdNameHash(function(err, species_hash){
+				                institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+
+					                // RFID pit_tag -> Species[institution_id, species_id]
+					                // RFID collector_id -> Collectors[collector_name]
+
+									var rfidArray = message.data.datasummary.data;
+									for(var key in rfidArray){
+										var rfid = rfidArray[key];
+
+										tagged_fishes.getTaggedFishesByPitTagSpeciesIdInstituionIdHash(rfid.identificationcode, function(err, rfidtag_hash){
+				                            
+											var rfiddata = new Object;
+											console.log("rfidtag_hash" + JSON.stringify(rfidtag_hash));
+
+				                            rfid.institution_name = institutions_hash[rfidtag_hash.institution_id];
+				                            rfid.species_name = species_hash[rfidtag_hash.species_id];
+				                            rfid.collector_name = species_hash[rfidArray[key].collector_id];
+
+				                            console.log(JSON.stringify(rfid));
+
+											jade.renderFile('./views/fishrow.jade', {rfiddata: rfid}, function (err, html) {
+											  if (!err) 
+												serverEmitter.emit('rfiddata', { htmlRow: html} );	
+											  else throw err
+											});
+							            });														
+									}
+								});
+				            });
+				        });
+				                    
+
+
 					}
 				});
 			}

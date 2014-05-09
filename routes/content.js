@@ -73,7 +73,7 @@ function ContentHandler (db) {
     this.displayMainPage = function(req, res, next) {
         "use strict";
 
-        return res.render('index', {
+        return res.render('home', {
             title: 'FishBook - Home',
             username: req.username,
             admin: '',
