@@ -7,8 +7,11 @@ block append content
         form(role="form" method="post" action="add_collectors")
           div(class="form-group")
 
-            label(for="collectorsID") ID
-            input(type="text" class="form-control" id="collectorsID" name="_id")
+            label(for="institution") Institution
+            select(name="institution_id" id="institution" class="form-control")
+                -var jsonArray = JSON.parse(institutions_list)
+                for data in jsonArray
+                  option(value=data._id) #{data.name}
 
             label(for="collectorsName") Name
             input(type="text" class="form-control" id="collectorsName" name="name")

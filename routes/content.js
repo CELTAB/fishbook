@@ -6,6 +6,7 @@ var InstitutionsDAO = require('../models/institutions').InstitutionsDAO
     TaggedFishesDAO = require('../models/tagged_fishes').TaggedFishesDAO,
     UsersDAO = require('../models/users').UsersDAO,
     ImagesDAO = require('../models/images').ImagesDAO,
+    path = require('path'),
     fs = require('fs');
 
 /* The ContentHandler must be constructed with a connected db */
@@ -21,17 +22,38 @@ function ContentHandler (db) {
     var images = new ImagesDAO(db);
 
     var insertImage = function(imgFile, callback){
-        var uniqueFileName = imgFile.path + "_" + (new Date).toISOString()
+        
+        var addZero = function (i) {
+            if (i < 10) {
+                i = "0" + i;
+            }
+            return i;
+        }
 
-        var fl = fs.createReadStream(imgFile.path);
+        var filename = path.basename(imgFile.path);
+        var extension = path.extname(imgFile.name).toLowerCase();
+        var date = new Date;
 
-        console.log("FL opened! - " + uniqueFileName);
-        fl.pipe(fs.createWriteStream(__dirname+'/public/uploads/images/'+uniqueFileName));
+        var d = addZero(date.getDate());
+        var M = addZero(date.getMonth());
+        var y = addZero(date.getFullYear());
+
+        var h = addZero(date.getHours());
+        var m = addZero(date.getMinutes());
+        var s = addZero(date.getSeconds());
+
+        var appDir = path.dirname(require.main.filename);
+
+        var uniqueFileName =  d+'_'+M+'_'+y+'-'+h+m+s+"_" + filename+extension;
+        var imagePath = appDir+'/public/uploads/images/'+uniqueFileName;
+        console.log(imagePath);
+        
+        fs.createReadStream(imgFile.path).pipe(fs.createWriteStream(imagePath));
 
         // name, image_path, type, size, 
         var file = { 
                      name: uniqueFileName,
-                     image_path: imgFile.path,
+                     image_path: imagePath,
                      type: imgFile.type,
                      size: imgFile.size,
                      insert_date: (new Date).toISOString()
@@ -43,7 +65,7 @@ function ContentHandler (db) {
                 callback(null);
                 return next(err);
             }
-            callback(uniqueFileName);
+            callback(file.name);
         });
     }
 
@@ -92,22 +114,15 @@ function ContentHandler (db) {
         "use strict";
         var name = req.body.name;
 
-        var imgName = "";
-
-        console.log(req.files.imgSrc);
         insertImage(req.files.imgSrc, function(imageName) {
             "use strict";
 
-            if(imageName){
-                imgName = imageName;
-            }
+            institutions.add(name, imageName, function(err) {
+                if (err) return next(err);
+
+                return res.redirect("/institutions");
+            }); 
         });        
-
-        institutions.add(name, imgName, function(err) {
-            if (err) return next(err);
-
-            return res.redirect("/institutions");
-        });
     }
 
     /* SPECIES */
@@ -160,40 +175,49 @@ function ContentHandler (db) {
     this.displayCollectors = function(req, res, next){
         "use strict";
 
-        collectors.getCollectors(function(err,result){
-            if(err) return next(err);
+        institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+            collectors.getCollectors(function(err,result){
+                if(err) return next(err);
+                
+                for(var key in result){
+                    result[key].institution_name = institutions_hash[result[key].institution_id];
+                }
 
-            return res.render('collectors', {
-                title: 'FishBook - Collectors',
-                username: req.username,
-                admin: req.admin,
-                login_error: '',
-                collectors: JSON.stringify(result)
+                return res.render('collectors', {
+                    title: 'FishBook - Collectors',
+                    username: req.username,
+                    admin: req.admin,
+                    login_error: '',
+                    collectors: JSON.stringify(result)
+                });
             });
         });
     };
 
     this.displayAddCollectors = function(req, res, next) {
         "use strict";        
-
-        return res.render('add_collectors', {
-                title: 'FishBook - Add new Collector',
-                username: req.username,
-                admin: req.admin,                
-                login_error: '',
-                collector: ''
+        institutions.getInstitutions(function(err, institutions_list){
+            return res.render('add_collectors', {
+                    title: 'FishBook - Add new Collector',
+                    username: req.username,
+                    admin: req.admin,                
+                    login_error: '',
+                    collector: '',
+                    institutions_list: JSON.stringify(institutions_list)
+            });            
         });
+
     }    
 
     this.handleAddCollectors = function(req, res, next) {
         "use strict";
-        var _id = req.body._id;
+        var institution_id = req.body.institution_id;
         var name = req.body.name;      
         var mac = req.body.mac;      
         var description = req.body.description;      
 
         // even if there is no logged in user, we can still post a comment
-        collectors.add(_id, name, mac, description, function(err) {
+        collectors.add(institution_id, name, mac, description, function(err) {
             "use strict";
 
             if (err) return next(err);
@@ -207,35 +231,53 @@ function ContentHandler (db) {
     this.displayTaggedFishes = function(req, res, next){
         "use strict";
 
-        tagged_fishes.getTaggedFishes(function(err,result){
-            if(err) return next(err);
+        species.getSpeciesIdNameHash(function(err, species_hash){
+            institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+                tagged_fishes.getTaggedFishes(function(err,result){
+                    if(err) return next(err);
 
-            return res.render('tagged_fishes', {
-                title: 'FishBook - Tagged Fishes',
-                username: req.username,
-                admin: req.admin,
-                login_error: '',
-                tagged_fishes: JSON.stringify(result)
-            });
+                    for(var key in result){
+                        result[key].institution_name = institutions_hash[result[key].institution_id];
+                        result[key].species_name = species_hash[result[key].species_id];
+                    }
+
+                    return res.render('tagged_fishes', {
+                        title: 'FishBook - Tagged Fishes',
+                        username: req.username,
+                        admin: req.admin,
+                        login_error: '',
+                        tagged_fishes: JSON.stringify(result)
+                    });
+                });
+            });   
         });
     };
 
     this.displayAddTaggedFishes = function(req, res, next) {
         "use strict";        
 
-        return res.render('add_tagged_fishes', {
-                title: 'FishBook - Add new Tagged Fish',
-                username: req.username,
-                admin: req.admin,                
-                login_error: '',
-                tagged_fishes: ''
+        species.getSpecies(function(err, species_list){
+            institutions.getInstitutions(function(err, institutions_list){
+                return res.render('add_tagged_fishes', {
+                    title: 'FishBook - Add new Tagged Fish',
+                    username: req.username,
+                    admin: req.admin,                
+                    login_error: '',
+                    tagged_fishes: '',
+                    species_list: JSON.stringify(species_list),
+                    institutions_list: JSON.stringify(institutions_list)
+                });
+            });   
         });
+
+     
     }    
 
     this.handleAddTaggedFishes = function(req, res, next) {
         "use strict";
      
-        var specie = req.body.specie;   
+        var species_id = req.body.species_id;   
+        var institution_id = req.body.institution_id;
         var pit_tag = req.body.pit_tag;
         var capture_local = req.body.capture_local;
         var release_local = req.body.release_local;
@@ -243,12 +285,12 @@ function ContentHandler (db) {
         var default_length = req.body.default_length;
         var weight = req.body.weight;
         var sex = req.body.sex;
-        var observation = req.body.observation;   
+        var observation = req.body.observation;
 
         // even if there is no logged in user, we can still post a comment
-        tagged_fishes.add(  specie, pit_tag, capture_local, release_local,
+        tagged_fishes.add(  species_id, pit_tag, capture_local, release_local,
                             total_length, default_length, weight, sex, 
-                            observation, function(err) {
+                            observation, institution_id, function(err) {
             "use strict";
 
             if (err) return next(err);
@@ -412,17 +454,33 @@ function ContentHandler (db) {
     this.displayMonActivities = function(req, res, next) {
         "use strict";
 
-        rfidadata.getRFIDData(20, function(err, result){
-            if(err) return next(err);
-            return res.render('mon_activities', {
-                title: 'FishBook - Collectors activities',
-                username: req.username,
-                admin: req.admin,                
-                login_error: '',
-                rfiddata_list: JSON.stringify(result)
-            });
+        collectors.getCollectorsIdNameHash(function(err, collectors_hash){
+            species.getSpeciesIdNameHash(function(err, species_hash){
+                institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+                    rfidadata.getRFIDData(20, function(err, result){
+                        if(err) return next(err);
 
+                        for(var key in result){
+                            result[key].institution_name = institutions_hash[result[key].institution_id];
+                            result[key].species_name = species_hash[result[key].species_id];
+                            result[key].collector_name = species_hash[result[key].collector_id];
+                        }
+
+                        return res.render('mon_activities', {
+                            title: 'FishBook - Collectors activities',
+                            username: req.username,
+                            admin: req.admin,                
+                            login_error: '',
+                            rfiddata_list: JSON.stringify(result)
+                        });
+
+                    });
+                });
+                
+            });
         });
+
+
     }
 
 }

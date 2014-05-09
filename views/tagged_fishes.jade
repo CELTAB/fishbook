@@ -6,11 +6,12 @@ block append content
       div(class="col-md-1")
           a(class="btn btn-primary" href="/add_tagged_fishes") Add tagged fish
     div(class="row")      
-      div(class="col-md-9")        
+      div(class="col-md-12")        
         table(class="table")
           thead
             tr
-              th Specie
+              th Institution
+              th Species
               th PIT Tag
               th Capture Local
               th Release Local
@@ -22,8 +23,9 @@ block append content
           tbody(id="tableBody")
           -var jsonArray = JSON.parse(tagged_fishes)
           for data in jsonArray
-            tr 
-              td= data.specie
+            tr
+              td= data.institution_name
+              td= data.species_name
               td= data.pit_tag
               td= data.capture_local
               td= data.release_local

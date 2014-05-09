@@ -43,6 +43,41 @@ function SpeciesDAO(db){
             callback(err, items);
     	});
     }
+
+    this.getSpecieById = function(id, callback){
+        "use strict";
+
+        species.find({'_id':id}).sort('name',1).toArray(function(err, item){
+            "use strict";
+
+            if (err){ 
+                console.log("Error getSpecies, " + err);                
+                return callback(err, null)
+            };
+
+            callback(err, item);
+        });
+    }
+
+    this.getSpeciesIdNameHash = function(callback){
+        "use strict";
+
+        species.find({}, {'_id':1, 'name':1}).sort('name',1).toArray(function(err, items){
+            "use strict";
+
+            if (err){ 
+                console.log("Error getSpecies, " + err);                
+                return callback(err, null)
+            };
+
+            var hash = {};
+            for(var key in items){
+                hash[items[key]._id] = items[key].name;
+            }
+
+            callback(err, hash);
+        });
+    }
 }
 
 module.exports.SpeciesDAO = SpeciesDAO;

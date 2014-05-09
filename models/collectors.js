@@ -10,11 +10,11 @@ function CollectorsDAO(db) {
 
     var collectors = db.collection("collectors");
 
-    this.add = function (_id, name, mac, description, callback) {
+    this.add = function (institution_id, name, mac, description, callback) {
         "use strict";
         
         var collector = {
-                "_id": _id,
+                "institution_id": institution_id,
                 "name": name,
                 "mac" : mac,
                 "description" : description
@@ -47,6 +47,25 @@ function CollectorsDAO(db) {
     }
 
     
+    this.getCollectorsIdNameHash = function(callback) {
+        "use strict";
+
+        collectors.find().sort('name', 1).toArray(function(err, items) {
+            "use strict";
+
+            if (err){ 
+                console.log("Error getCollectors, " + err);                
+                return callback(err, null)
+            };
+
+            var hash = {};
+            for(var key in items){
+                hash[items[key]._id] = items[key].name;
+            }
+            
+            callback(err, hash);
+        });
+    }
 }
 
 module.exports.CollectorsDAO = CollectorsDAO;

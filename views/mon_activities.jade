@@ -32,11 +32,13 @@ block stylesheets
 block append content
   div.container.highlight
     div.row.starter-template
-    div(class="span-6")
+    div(class="col-md-12")
         table(id="rfidtable" class="table")
             thead
                 tr
-                    th Collector ID
+                    th Institution
+                    th Collector
+                    th Species
                     th Antena ID
                     th PIT TAG
                     th Date & Time
@@ -47,14 +49,18 @@ block append content
                     if odd == 0
                         -odd = 1
                         tr(class="success") 
-                            td= rfiddata.idcollectorpoint
+                            td= rfiddata.institution_name
+                            td= rfiddata.collector_name
+                            td= rfiddata.species_name
                             td= rfiddata.idantena
                             td= rfiddata.identificationcode
                             td= (new Date(rfiddata.datetime)).toISOString().replace(/T/, ' ').replace(/\..+/, '')
                     else
                         -odd = 0
                         tr
-                            td= rfiddata.idcollectorpoint
+                            td= rfiddata.institution_name
+                            td= rfiddata.collector_name
+                            td= rfiddata.species_name
                             td= rfiddata.idantena
                             td= rfiddata.identificationcode
                             td= (new Date(rfiddata.datetime)).toISOString().replace(/T/, ' ').replace(/\..+/, '')

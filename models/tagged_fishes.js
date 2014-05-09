@@ -10,13 +10,13 @@ function TaggedFishesDAO(db) {
 
     var tagged_fishes = db.collection("tagged_fishes");
 
-    this.add = function (specie, pit_tag, capture_local,
+    this.add = function (species_id, pit_tag, capture_local,
                          release_local, total_length, default_length,
-                         weight, sex, observation, callback) {
+                         weight, sex, observation, institution_id, callback) {
         "use strict";
         
         var tagged_fish = {
-            "specie" : specie,
+            "species_id" : species_id,
             "pit_tag" : pit_tag,
             "capture_local": capture_local,
             "release_local": release_local,
@@ -24,7 +24,8 @@ function TaggedFishesDAO(db) {
             "default_length": default_length,
             "weight" : weight,
             "sex": sex,
-            "observation": observation
+            "observation": observation,
+            "institution_id": institution_id
         }
 
         tagged_fishes.insert(tagged_fish, function (err, result) {

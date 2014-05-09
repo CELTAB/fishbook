@@ -10,11 +10,11 @@ function InstitutionsDAO(db) {
 
     var institutions = db.collection("institutions");
 
-    this.add = function (name, image_path, callback) {
+    this.add = function (name, image_name, callback) {
         "use strict";
         
         var institution = {"name": name,
-                "image_path": image_path,
+                "image_name": image_name,
                 "date": new Date()}
 
         institutions.insert(institution, function (err, result) {
@@ -43,6 +43,38 @@ function InstitutionsDAO(db) {
         });
     }
 
+    this.getInstitutionById = function(id, callback) {
+        "use strict";
+
+        institutions.find({'_id':id}).sort('name', 1).toArray(function(err, item) {
+            "use strict";
+
+            if (err){ 
+                console.log("Error getInstitutions, " + err);                
+                return callback(err, null)
+            };       
+            callback(err, item);
+        });
+    }
+
+        this.getInstitutionsIdNameHash= function(callback) {
+        "use strict";
+
+        institutions.find({}, {'_id':1, 'name':1}).sort('name', 1).toArray(function(err, items) {
+            "use strict";
+
+            if (err){ 
+                console.log("Error getInstitutions, " + err);                
+                return callback(err, null)
+            };       
+
+            var hash = {};
+            for(var key in items){
+                hash[items[key]._id] = items[key].name;
+            }
+            callback(err, hash);
+        });
+    }
     
 }
 

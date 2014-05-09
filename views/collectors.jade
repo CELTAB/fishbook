@@ -10,7 +10,7 @@ block append content
         table(class="table")
           thead
             tr
-              th ID
+              th Institution
               th Name
               th MAC
               th Description
@@ -18,7 +18,7 @@ block append content
           -var jsonArray = JSON.parse(collectors)
           for data in jsonArray
             tr 
-              td= data._id
+              td= data.institution_name
               td= data.name
               td= data.mac
               td= data.description
