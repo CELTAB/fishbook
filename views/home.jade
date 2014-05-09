@@ -6,17 +6,54 @@ block stylesheets
 block append scripts
   script(src='https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false')
 
-  script().    
+  script(). 
+    var latDefault = "-24.77031290445274";
+    var lngDefault = "-54.36337910592556";
+    var markers=[];
+    
+    var latLng;
     var map;
+
     function initialize() {
+      latLng = new google.maps.LatLng(latDefault, lngDefault);
       var mapOptions = {
         zoom: 8,
-        center: new google.maps.LatLng(-34.397, 150.644)
+        center: latLng,
+        mapTypeId: google.maps.MapTypeId.HYBRID
       };
-      var mapCanvas = document.getElementById('map-canvas');
-      map = new google.maps.Map(mapCanvas, mapOptions);
+      map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+      create_marker(latLng);
     }
+
     google.maps.event.addDomListener(window, 'load', initialize);
+
+    function create_marker(latLng){
+      marker = new google.maps.Marker({
+        map: map,
+          draggable: true 
+      });
+
+      marker.setPosition(latLng);
+      map.setZoom(8);
+      
+      google.maps.event.addListener(map, "click", function(event) {
+        marker.setPosition(event.latLng);
+      });
+      google.maps.event.addListener(marker, "drag", function(event) {
+        marker.setPosition(event.latLng);
+      });
+
+      markers.push(marker);
+      map.setCenter(latLng);
+    }     
+
+    function delete_markers() {
+      for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+      }
+      markers = [];
+    }
 
 block append content
 
