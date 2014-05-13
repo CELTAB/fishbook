@@ -85,3 +85,12 @@ body {
   margin-top: 15px;
   margin-bottom: 10px;
 }
+
+.img-custom-small {
+  height: 100px;
+  width: auto;
+}
+.img-custom-medium {
+  height: 300px;
+  width: auto;
+}

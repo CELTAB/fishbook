@@ -8,11 +8,37 @@ block append content
           div(class="row")
             div(class="form-group")
               div(class="col-md-6")
-                label(for="collectorsID") Collector ID
-                input(type="text" class="form-control" id="collectorsID" name="collector_id")
+
+                label(for="speciesID") Species
+                select(name="species_id" id="speciesID" class="form-control")
+                  option(value="")
+                  -var jsonArray = JSON.parse(species_list)
+                  for data in jsonArray
+                    option(value="#{data._id}") #{data.name}
+
+                label(for="institutionID") Institution
+                select(name="institution_id" id="institutionID" class="form-control")
+                  option(value="")
+                  -var jsonArray = JSON.parse(institutions_list)
+                  for data in jsonArray
+                    option(value="#{data._id}") #{data.name}
+
+                label(for="collectorID") Collector
+                select(name="collector_id" id="collectorID" class="form-control")
+                  option(value="")
+                  -var jsonArray = JSON.parse(collectors_list)
+                  for data in jsonArray
+                    option(value="#{data._id}") #{data.name}
 
                 label(for="tag") TAG
                 input(type="text" class="form-control" id="tag" name="tag")
+
+                
+
+              div(class="col-md-6")
+
+                label(for="limit") Limit of results
+                input(type="text" class="form-control" id="limit" name="results_limit")
 
                 label(for="sortBy") Sort By
                 select(name="sortBy" id="sortBy" class="form-control")
@@ -21,34 +47,38 @@ block append content
                   option(value="identificationcode") TAG
                   option(value="datetime") Date
 
-              div(class="col-md-6")
                 label(for="sortOrder") Order
                 select(name="sortOrder" id="sortOrder" class="form-control")
                   option(value="")
                   option(value="1") Ascending
-                  option(value="-1") Descending
+                  option(value="-1") Descending                
 
-                label(for="limit") Limit of results
-                input(type="text" class="form-control" id="limit" name="results_limit")
+                label(for="exportCSVID") Export to CSV
+                input(type='checkbox' class="checkbox" id="exportCSVID" name="exportToCSV" checked=false)
           div(class="row")
               
 
             div(class="col-md-1")
               button(type="submit" class="btn btn-default btn-custom") Search
-    
-      div(class="col-md-9")        
-        table(class="table")
-          thead
-            tr
-              th ID Collector
-              th Antenna
-              th TAG
-              th Date
-          tbody(id="tableBody")
-          -var jsonArray = JSON.parse(result_list)
-          for data in jsonArray
-            tr 
-              td= data.idcollectorpoint
-              td= data.idantena
-              td= data.identificationcode
-              td= data.datetime
+              //button(type="button" id="exportToCSV" class="btn btn-default btn-custom") Export to CSV
+      if(result_list != '[]')
+        div(class="col-md-9")        
+          table(class="table")
+            thead
+              tr
+                th Institution
+                th Collector
+                th Antenna
+                th Species
+                th TAG
+                th Date
+            tbody(id="tableBody")
+            -var jsonArray = JSON.parse(result_list)
+            for data in jsonArray
+              tr 
+                td= data.institution_name
+                td= data.collector_name
+                td= data.idantena
+                td= data.species_name
+                td= data.identificationcode
+                td= (new Date(data.datetime)).toISOString().replace(/T/, ' ').replace(/\..+/, '')

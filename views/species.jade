@@ -17,4 +17,6 @@ block append content
           for data in jsonArray
             tr 
               td= data.name
-              td= data.image
+              td
+                 if data.image
+                   img(class="img-rounded img-custom-small" src='/uploads/images/'+data.image)

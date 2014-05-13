@@ -11,13 +11,13 @@ block append content
             select(name="species_id" id="taggedSpecies" class="form-control")
                 -var jsonArray = JSON.parse(species_list)
                 for data in jsonArray
-                  option(value=data._id) #{data.name}
+                  option(value="#{data._id}") #{data.name}
 
             label(for="taggedInstitution") Institution
             select(name="institution_id" id="taggedInstitution" class="form-control")
                 -var jsonArray = JSON.parse(institutions_list)
                 for data in jsonArray
-                  option(value=data._id) #{data.name}
+                  option(value="#{data._id}") #{data.name}
 
             label(for="taggedPIT") PIT Tag
             input(type="text" class="form-control" id="taggedPIT" name="pit_tag")
