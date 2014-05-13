@@ -483,6 +483,10 @@ function ContentHandler (db) {
 
     }
 
+    this.displayMonCollectors = function(req, res, next){
+        
+    }
+
 }
 
 module.exports = ContentHandler;

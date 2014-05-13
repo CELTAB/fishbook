@@ -17,7 +17,7 @@ module.exports = exports = function(app, db) {
     app.get('/collectors', contentHandler.displayCollectors);
     app.get('/tagged_fishes', contentHandler.displayTaggedFishes);
     app.get('/users', contentHandler.displayUsers);
-    // app.get('/mon_collectors', contentHandler.displayMonCollectors);
+    app.get('/mon_collectors', contentHandler.displayMonCollectors);
     app.get('/mon_activities', contentHandler.displayMonActivities);
     app.get('/profile', contentHandler.displayProfile);
     app.get('/search_rfids', contentHandler.displaySearchRFIDs);

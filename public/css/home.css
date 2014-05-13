@@ -1,0 +1,6 @@
+html, body, .container, .row, .col-md-12  { height: 100% }
+
+#map-canvas {
+  width:100%;
+  height:100%;
+}

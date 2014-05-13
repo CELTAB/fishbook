@@ -2,6 +2,7 @@ extends base_layout
 
 block stylesheets
   link(href="/css/style.css" rel="stylesheet")
+  link(href="/css/home.css" rel="stylesheet")
 
 block append scripts
   script(src='https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false')
@@ -57,7 +58,8 @@ block append scripts
 
 block append content
 
-  div(class="container")
-    div(id="mapCanvasRow" class="row")
-      div(class="col-md-12")
-        div(class="google-map-canvas" id="map-canvas")                
+  if username
+    div(class="container")
+      div(id="mapCanvasRow" class="row")
+        div(class="col-md-12")
+          div(class="google-map-canvas" id="map-canvas")                
