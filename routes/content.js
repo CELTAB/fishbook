@@ -7,7 +7,8 @@ var InstitutionsDAO = require('../models/institutions').InstitutionsDAO
     UsersDAO = require('../models/users').UsersDAO,
     ImagesDAO = require('../models/images').ImagesDAO,
     path = require('path'),
-    fs = require('fs');
+    fs = require('fs'),
+    json2csv = require('json2csv');
 
 /* The ContentHandler must be constructed with a connected db */
 function ContentHandler (db) {
@@ -22,51 +23,55 @@ function ContentHandler (db) {
     var images = new ImagesDAO(db);
 
     var insertImage = function(imgFile, callback){
-        
-        var addZero = function (i) {
-            if (i < 10) {
-                i = "0" + i;
+        console.log("aqui");
+        if(imgFile.name){
+            var addZero = function (i) {
+                if (i < 10) {
+                    i = "0" + i;
+                }
+                return i;
             }
-            return i;
+
+            var filename = path.basename(imgFile.path);
+            var extension = path.extname(imgFile.name).toLowerCase();
+            var date = new Date;
+
+            var d = addZero(date.getDate());
+            var M = addZero(date.getMonth());
+            var y = addZero(date.getFullYear());
+
+            var h = addZero(date.getHours());
+            var m = addZero(date.getMinutes());
+            var s = addZero(date.getSeconds());
+
+            var appDir = path.dirname(require.main.filename);
+
+            var uniqueFileName =  d+'_'+M+'_'+y+'-'+h+m+s+"_" + filename+extension;
+            var imagePath = appDir+'/public/uploads/images/'+uniqueFileName;
+            console.log(imagePath);
+            
+            fs.createReadStream(imgFile.path).pipe(fs.createWriteStream(imagePath));
+
+            // name, image_path, type, size, 
+            var file = { 
+                         name: uniqueFileName,
+                         image_path: imagePath,
+                         type: imgFile.type,
+                         size: imgFile.size,
+                         insert_date: (new Date).toISOString()
+                       };
+
+            images.add(file, function(err){
+                if(err) {
+                    console.log("Error upload file: " + err);
+                    callback(null);
+                    return next(err);
+                }
+                callback(file.name);
+            });
+        }else{
+            callback(''); 
         }
-
-        var filename = path.basename(imgFile.path);
-        var extension = path.extname(imgFile.name).toLowerCase();
-        var date = new Date;
-
-        var d = addZero(date.getDate());
-        var M = addZero(date.getMonth());
-        var y = addZero(date.getFullYear());
-
-        var h = addZero(date.getHours());
-        var m = addZero(date.getMinutes());
-        var s = addZero(date.getSeconds());
-
-        var appDir = path.dirname(require.main.filename);
-
-        var uniqueFileName =  d+'_'+M+'_'+y+'-'+h+m+s+"_" + filename+extension;
-        var imagePath = appDir+'/public/uploads/images/'+uniqueFileName;
-        console.log(imagePath);
-        
-        fs.createReadStream(imgFile.path).pipe(fs.createWriteStream(imagePath));
-
-        // name, image_path, type, size, 
-        var file = { 
-                     name: uniqueFileName,
-                     image_path: imagePath,
-                     type: imgFile.type,
-                     size: imgFile.size,
-                     insert_date: (new Date).toISOString()
-                   };
-
-        images.add(file, function(err){
-            if(err) {
-                console.log("Error upload file: " + err);
-                callback(null);
-                return next(err);
-            }
-            callback(file.name);
-        });
     }
 
 
@@ -158,15 +163,19 @@ function ContentHandler (db) {
     this.handleAddSpecies = function(req, res, next) {
         "use strict";
         var name = req.body.name;
-        var image = req.body.image;      
+        var image = req.files.image;      
 
         // even if there is no logged in user, we can still post a comment
-        species.add(name, image, function(err) {
+
+        insertImage(image, function(imageName) {
             "use strict";
+            species.add(name, imageName, function(err) {
+                "use strict";
 
-            if (err) return next(err);
+                if (err) return next(err);
 
-            return res.redirect("/species");
+                return res.redirect("/species");
+            });
         });
     }
 
@@ -368,15 +377,17 @@ function ContentHandler (db) {
         var username = req.username;
         var name = req.body.name;    
         var email = req.body.email;    
-        var photo = req.body.photo;
+        var photo = req.files.photo;
 
-        // even if there is no logged in user, we can still post a comment
-        users.update(username, name, email, photo, function(err) {
+        insertImage(photo, function(imageName) {
             "use strict";
+            users.update(username, name, email, imageName, function(err) {
+                "use strict";
 
-            if (err) return next(err);
+                if (err) return next(err);
 
-            return res.redirect("/profile");
+                return res.redirect("/profile");
+            });
         });
     }
 
@@ -385,15 +396,23 @@ function ContentHandler (db) {
     this.displaySearchRFIDs = function(req, res, next){
         "use strict";
 
-        return res.render('search_rfids', {
-                title: 'FishBook - Search/Export Data',
-                username: req.username,
-                admin: req.admin,                
-                login_error: '',
-                result_list: JSON.stringify([])
+        species.getSpecies(function(err, species_list){
+            institutions.getInstitutions(function(err, institutions_list){
+                collectors.getCollectors(function(err, collectors_list){
+                    return res.render('search_rfids', {
+                         title: 'FishBook - Search/Export Data',
+                         username: req.username,
+                         admin: req.admin,                
+                         login_error: '',
+                         result_list: JSON.stringify([]),
+                         species_list: JSON.stringify(species_list),
+                         institutions_list: JSON.stringify(institutions_list),
+                         collectors_list: JSON.stringify(collectors_list)
+                     });
+                 });
+             });
         });
-
-    };
+    }
 
     this.handleSearchRFIDs = function(req, res, next) {
         "use strict";
@@ -405,23 +424,71 @@ function ContentHandler (db) {
         var sortBy = req.body.sortBy;
         var sortOrder = parseInt(req.body.sortOrder);
         var results_limit = parseInt(req.body.results_limit);
+        var species_id = parseInt(req.body.species_id);
+        var institution_id = parseInt(req.body.institution_id);
+        var exportToCSV = req.body.exportToCSV;
 
         if(collector_id)
             query.idcollectorpoint = collector_id;
         if(tag)
             query.identificationcode = tag;
+        if(species_id)
+            query.idcollectorpoint = species_id;
+        if(institution_id)
+            query.idcollectorpoint = institution_id;
 
 
-        // even if there is no logged in user, we can still post a comment
-        rfidadata.findRFIDData(query, sortBy, sortOrder, results_limit, function(err,result){
-            if(err) return next(err);
-
-            return res.render('search_rfids', {
-                title: 'FishBook - Search/Export Data',
-                username: req.username,
-                admin: req.admin,
-                login_error: '',
-                result_list: JSON.stringify(result)
+        collectors.getCollectorsIdNameHash(function(err, collectors_hash){
+             species.getSpeciesIdNameHash(function(err, species_hash){
+                 institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+                     rfidadata.findRFIDData(query, sortBy, sortOrder, results_limit, function(err,result){
+                         if(err) return next(err);
+ 
+                         for(var key in result){
+                             result[key].institution_name = institutions_hash[result[key].institution_id];
+                             result[key].species_name = species_hash[result[key].species_id];
+                             result[key].collector_name = species_hash[result[key].collector_id];
+                         }
+ 
+                         if(exportToCSV){
+                             json2csv(
+                                 {
+                                     data: result, 
+                                     fields: ['idcollectorpoint', 
+                                         'idantena', 
+                                         'identificationcode',
+                                         'applicationcode',
+                                         'datetime']}, function(err, csv) {
+                                 if (err) return next(err);
+                                 
+                                 var appDir = path.dirname(require.main.filename);
+                                 var wstream = fs.createWriteStream(appDir + '/public/downloads/export.csv');
+                                 wstream.write(csv);
+                                 wstream.end(function(){
+                                     res.download(appDir + '/public/downloads/export.csv');    
+                                 });
+                                 
+                             });
+                         }else{
+                             species.getSpecies(function(err, species_list){
+                                 institutions.getInstitutions(function(err, institutions_list){
+                                     collectors.getCollectors(function(err, collectors_list){
+                                         return res.render('search_rfids', {
+                                             title: 'FishBook - Search/Export Data',
+                                             username: req.username,
+                                             admin: req.admin,                
+                                             login_error: '',
+                                             result_list: JSON.stringify(result),
+                                             species_list: JSON.stringify(species_list),
+                                             institutions_list: JSON.stringify(institutions_list),
+                                             collectors_list: JSON.stringify(collectors_list)
+                                         });
+                                     });
+                                 });   
+                             });
+                         }            
+                     });
+                 });
             });
         });
     }

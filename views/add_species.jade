@@ -4,7 +4,7 @@ block append content
   div(class="container")
     div(class="row")
       div(class="col-md-6")
-        form(role="form" method="post" action="add_species")
+        form(role="form" method="post" action="add_species" enctype="multipart/form-data")
           div(class="form-group")
             label(for="specieName") Name
             input(type="text" class="form-control" id="specieName" name="name")

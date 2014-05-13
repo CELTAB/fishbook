@@ -4,7 +4,7 @@ block append content
   div(class="container")
     div(class="row")
       div(class="col-md-6")
-        form(role="form" method="post" action="profile")
+        form(role="form" method="post" action="profile" enctype="multipart/form-data")
           div(class="form-group")
 
             -var name = ''
@@ -14,23 +14,16 @@ block append content
             -var email = ''
             if profile.email 
               -email= profile.email
-
-            -var photo = ''
-            if profile.photo 
-              -photo= profile.photo
               
-            div(class="row")
-              div(class="col-xs-2")
-                label(for="userName") Name
-                input(type="text" class="form-control" id="userName" name="name" value="#{name}")
+            label(for="userName") Name
+            input(type="text" class="form-control" id="userName" name="name" value="#{name}")
 
-              div(class="col-xs-3")
-                label(for="userEmail") E-mail
-                input(type="text" class="form-control" id="userEmail" name="email"  value="#{email}")
+            label(for="userEmail") E-mail
+            input(type="text" class="form-control" id="userEmail" name="email"  value="#{email}")
 
-              div(class="col-xs-5")
-                label(for="userPhoto") Photo
-                input(type="file" id="userPhoto" name="photo")
-                p #{photo}
+            label(for="userPhoto") Photo
+            input(type="file" id="userPhoto" name="photo")
+            if profile.photo
+              img(class="img-thumbnail img-custom-small" src='/uploads/images/'+profile.photo)
 
           button(type="submit" class="btn btn-default") Update

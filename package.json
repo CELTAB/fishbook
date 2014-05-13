@@ -10,7 +10,8 @@
     "mongodb": "~1.3.9",
     "jade": "*",
     "validator": "~1.1.3",
-    "socket.io": "*"
+    "socket.io": "*",
+    "json2csv": "*"
   },
   "repository": "",
   "author": "Luis Valdes <luisvaldes88@gmail.com>",
