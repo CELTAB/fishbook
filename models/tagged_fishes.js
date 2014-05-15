@@ -41,7 +41,7 @@ function TaggedFishesDAO(db) {
     this.getTaggedFishes = function(callback) {
         "use strict";
 
-        tagged_fishes.find().sort('specie', 1).toArray(function(err, items) {
+        tagged_fishes.find().sort('species_id', 1).toArray(function(err, items) {
             "use strict";
 
             if (err){ 
@@ -55,16 +55,10 @@ function TaggedFishesDAO(db) {
     }
 
     
-
-    this.getTaggedFishesByPitTagSpeciesIdInstituionIdHash = function(pit_tag, callback) {
+    this.getTaggedFishesWithNames = function(callback) {
         "use strict";
 
-        console.log('Find One: ' + pit_tag);
-        tagged_fishes.findOne({'pit_tag': parseInt(pit_tag)}, function(err, item) {
-            console.log('Find One: ' + pit_tag + ' - ' + JSON.stringify(item));
-        });
-
-        tagged_fishes.find({'pit_tag': parseInt(pit_tag)}, {'species_id': 1, 'institution_id': 1}, function(err, item) {
+        tagged_fishes.find().sort('species_id', 1).toArray(function(err, items) {
             "use strict";
 
             if (err){ 
@@ -72,13 +66,42 @@ function TaggedFishesDAO(db) {
                 return callback(err, null)
             };
 
-            console.log("PIT_TAG: " + JSON.stringify(item));
+            callback(err, items);
+        });
+    }
+
+    this.getTaggedFishesByPitTagSpeciesIdInstutionIdHash = function(pit_tag, callback) {
+        "use strict";
+
+        tagged_fishes.findOne({'pit_tag': parseInt(pit_tag)}, function(err, item) {
 
             var hash = {};
+            if(item){ 
+           // console.log('Find One: ' + pit_tag + ' - ' + JSON.stringify(item));
+
+//            console.log("PIT_TAG: " + JSON.stringify(item));
+
             hash[item.pit_tag] = {'species_id': item.species_id, 'institution_id': item.institution_id};
 
+            }
             callback(err, hash);
         });
+
+    }
+
+        this.getTaggedFishesByPitTagHash = function(callback) {
+        "use strict";
+
+        tagged_fishes.find().toArray(function(err, items) {
+
+            var hash = {};
+            for(var key in items){
+                hash[items[key].pit_tag] = {'species_id': items[key].species_id, 'institution_id': items[key].institution_id};
+            }
+            
+            callback(err, hash);
+        });
+
     }
     
 }

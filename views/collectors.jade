@@ -1,5 +1,16 @@
 extends base_layout
 
+block append scripts
+    script(src='/js/jquery.min.js')
+    script(type='text/javascript').
+      $(document).ready(function(){
+        $("#tableBody tr").click(function() {
+          console.log('this.name: ' + $(this).attr('name'));
+          window.location = "/update_collectors/" +$(this).attr('name');
+        });
+      });
+
+
 block append content
   div(class="container ")
     div(class="row")
@@ -15,10 +26,10 @@ block append content
               th MAC
               th Description
           tbody(id="tableBody")
-          -var jsonArray = JSON.parse(collectors)
-          for data in jsonArray
-            tr 
-              td= data.institution_name
-              td= data.name
-              td= data.mac
-              td= data.description
+            -var jsonArray = JSON.parse(collectors)
+            for data in jsonArray
+              tr(name="#{data._id}") 
+                td= data.institution_name
+                td= data.name
+                td= data.mac
+                td= data.description

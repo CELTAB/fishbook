@@ -31,10 +31,25 @@ module.exports = function(SocketIO, db){
 
 	server.on('connection', function(socket) {
 		var address = socket.address();
-    console.log("New connection from " + address.address + ":" + address.port);
+    	console.log("New connection from " + address.address + ":" + address.port);    	
 
 		socket.on('end', function() {
 			console.log('Client Disconnected');
+			console.log('Collector MAC from Socket: ' + socket.CollectorMAC);
+			collectors.updateStatus(socket.CollectorMAC, 'Offline', function(err, number){
+
+			});
+
+			collectors.getCollectorByMac(socket.CollectorMAC, function(err, doc){
+				if(err) return err;
+
+				var collectorStatus = {
+					name: doc.name,
+					mac: doc.mac,
+					status: 'Offline'
+				};
+				serverEmitter.emit('collectors_status', collectorStatus);	
+			});			
 		});
 	
 		socket.on('data', function(data) {
@@ -62,6 +77,46 @@ module.exports = function(SocketIO, db){
 			if(message.type == "SYN"){
 				console.log("SYN : " + JSON.stringify(message));
 				var clientInfo = message.data;
+				console.log('clientInfo: '+ JSON.stringify(clientInfo));
+
+				// SYN : {"data":{"id":8250,"macaddress":"B8:27:EB:21:28:B7","name":"Canal de Iniciação"},"datetime":"2014-05-14T14:06:58","type":"SYN"}
+				collectors.getCollectorByMac(clientInfo.macaddress, function(err, doc){
+					if(err) return err;
+
+					socket.CollectorMAC = clientInfo.macaddress;
+
+					if(doc){
+						console.log('Collector MAC from Socket: ' + socket.CollectorMAC);
+						doc.status = 'Online';
+						collectors.updateStatus(clientInfo.macaddress, 'Online', function(err, number){
+
+						});
+						var collectorStatus = {
+							name: doc.name,
+							mac: doc.mac,
+							status: doc.status
+						};
+						serverEmitter.emit('collectors_status', collectorStatus);	
+					}else{
+						console.log('New Collector MAC from Socket: ' + socket.CollectorMAC);
+				        var collector = {
+				            institution_id: '',
+				            name: 'New Collector: ' + clientInfo.macaddress,
+				            mac: clientInfo.macaddress,
+				            description : 'Created automaticlly on date: ' + (new Date).toISOString(),
+							status: 'Online'
+				        };
+						collectors.add(collector, function(err) {
+
+						});
+						var collectorStatus = {
+							name: 'New Collector: ' + clientInfo.macaddress,
+							mac: clientInfo.macaddress,
+							status: 'Online'
+						};
+						serverEmitter.emit('collectors_status', collectorStatus);	
+					}
+				});
 
 				var handshake = {type:"ACK-SYN", data: {}, datetime: (new Date()).toISOString()};
 
@@ -85,6 +140,7 @@ module.exports = function(SocketIO, db){
 				console.log(JSON.stringify(message.data));
 				RFIDData_MongoDB.insert(message.data, function(success){
 					if(success){
+						var collectorMac = message.data.macaddress;
 						var md5hash = message.data.datasummary.md5diggest;
 						console.log("Hash inserted: " + md5hash);
 
@@ -99,7 +155,7 @@ module.exports = function(SocketIO, db){
 						socket.write(buildMessage(JSON.stringify(ack_data)));
 
 
-				        collectors.getCollectorsIdNameHash(function(err, collectors_hash){
+				        collectors.getCollectorsMacNameHash(function(err, collectors_hash){
 				            species.getSpeciesIdNameHash(function(err, species_hash){
 				                institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
 
@@ -110,14 +166,27 @@ module.exports = function(SocketIO, db){
 									for(var key in rfidArray){
 										var rfid = rfidArray[key];
 
-										tagged_fishes.getTaggedFishesByPitTagSpeciesIdInstituionIdHash(rfid.identificationcode, function(err, rfidtag_hash){
+										tagged_fishes.getTaggedFishesByPitTagSpeciesIdInstutionIdHash(rfid.identificationcode, function(err, rfidtag_hash){
 				                            
 											var rfiddata = new Object;
-											console.log("rfidtag_hash" + JSON.stringify(rfidtag_hash));
+											console.log("rfidtag_hash: " + JSON.stringify(rfidtag_hash));
+											console.log("institutions_hash: " + JSON.stringify(institutions_hash));
+											console.log("species_hash: " + JSON.stringify(species_hash));
+											console.log("collectors_hash: " + JSON.stringify(collectors_hash));
 
-				                            rfid.institution_name = institutions_hash[rfidtag_hash.institution_id];
-				                            rfid.species_name = species_hash[rfidtag_hash.species_id];
-				                            rfid.collector_name = species_hash[rfidArray[key].collector_id];
+											var tagId = rfid.identificationcode;
+											var tagInfo = rfidtag_hash[tagId];
+											console.log('tagId: '+ JSON.stringify(tagId) + ', tagInfo: ' + JSON.stringify(tagInfo));
+
+											if(tagInfo){
+				                            	rfid.institution_name = institutions_hash[tagInfo.institution_id];
+				                            	rfid.species_name = species_hash[tagInfo.species_id];
+				                            	rfid.collector_name = collectors_hash[collectorMac].name;
+				                        	}else{
+												rfid.institution_name = 'Unknown';
+				                            	rfid.species_name = 'Unknown';
+				                            	rfid.collector_name = 'Unknown';
+				                        	}
 
 				                            console.log(JSON.stringify(rfid));
 
@@ -126,7 +195,10 @@ module.exports = function(SocketIO, db){
 												serverEmitter.emit('rfiddata', { htmlRow: html} );	
 											  else throw err
 											});
-							            });														
+							            });	
+
+
+
 									}
 								});
 				            });
@@ -141,7 +213,7 @@ module.exports = function(SocketIO, db){
 	});
 
 	serverEmitter.on('rfiddata', function(data){
-		console.log('serverEmitter.on: '+data);
+		console.log('serverEmitter.on: '+JSON.stringify(data));
 	});
 
 

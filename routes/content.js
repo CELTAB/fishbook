@@ -218,15 +218,61 @@ function ContentHandler (db) {
 
     }    
 
+    this.displayUpdateCollectors = function(req, res, next) {
+        "use strict";  
+        collectors.getCollectorById(req.params.id,  function(err, collector_item) {     
+            institutions.getInstitutions(function(err, institutions_list){                
+                return res.render('update_collectors', {
+                        title: 'FishBook - Add new Collector',
+                        username: req.username,
+                        admin: req.admin,                
+                        login_error: '',
+                        collector: JSON.stringify(collector_item),
+                        institutions_list: JSON.stringify(institutions_list)
+                });            
+            });
+        });
+
+
+    }   
+
     this.handleAddCollectors = function(req, res, next) {
         "use strict";
-        var institution_id = req.body.institution_id;
-        var name = req.body.name;      
-        var mac = req.body.mac;      
-        var description = req.body.description;      
+
+        var collector = {
+            institution_id: req.body.institution_id,
+            name: req.body.name,
+            mac: req.body.mac,
+            description : req.body.description,
+            status: 'Offline'
+        };
 
         // even if there is no logged in user, we can still post a comment
-        collectors.add(institution_id, name, mac, description, function(err) {
+        collectors.add(collector, function(err) {
+            "use strict";
+
+            if (err) return next(err);
+
+            return res.redirect("/collectors");
+        });
+    }
+
+    this.handleUpdateCollectors = function(req, res, next) {
+        "use strict";
+
+        var collector = {
+            _id: req.body.collector_id,
+            institution_id: req.body.institution_id,
+            name: req.body.name,
+            mac: req.body.mac,
+            description : req.body.description,
+            status: 'Offline'
+        };
+
+        console.log('update collector: ' + JSON.stringify(collector));
+
+        // even if there is no logged in user, we can still post a comment
+        collectors.save(collector, function(err) {
             "use strict";
 
             if (err) return next(err);
@@ -521,29 +567,43 @@ function ContentHandler (db) {
     this.displayMonActivities = function(req, res, next) {
         "use strict";
 
-        collectors.getCollectorsIdNameHash(function(err, collectors_hash){
+        collectors.getCollectorsMacNameHash(function(err, collectors_hash){
             species.getSpeciesIdNameHash(function(err, species_hash){
                 institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
-                    rfidadata.getRFIDData(20, function(err, result){
-                        if(err) return next(err);
+                    tagged_fishes.getTaggedFishesByPitTagHash(function(err, tagged_fish_hash){                    
+                        
+                        rfidadata.getRFIDData(20, function(err, result){
+                            if(err) return next(err);                        
 
-                        for(var key in result){
-                            result[key].institution_name = institutions_hash[result[key].institution_id];
-                            result[key].species_name = species_hash[result[key].species_id];
-                            result[key].collector_name = species_hash[result[key].collector_id];
-                        }
+                            for(var key in result) {
+                                // Institution ID from the collector that captured the PIT_TAG
+                                var institution_id = collectors_hash[result[key].macaddress].institution_id;
+                                var species_id = tagged_fish_hash[result[key].identificationcode].species_id;
+                                console.log('collectors_hash: '+JSON.stringify(collectors_hash));
+                                console.log('institutions_hash: '+JSON.stringify(institutions_hash));
 
-                        return res.render('mon_activities', {
-                            title: 'FishBook - Collectors activities',
-                            username: req.username,
-                            admin: req.admin,                
-                            login_error: '',
-                            rfiddata_list: JSON.stringify(result)
+                                // If institution_id is null, the Institution is unknown
+                                if(institution_id){
+                                    result[key].institution_name = institutions_hash[institution_id];
+                                }else{
+                                    result[key].institution_name = 'Unknown';
+                                }
+                                result[key].species_name = species_hash[species_id];
+                                result[key].collector_name = collectors_hash[result[key].macaddress].name;
+                                console.log('rfiddata: ' + JSON.stringify(result[key]));
+                            }
+
+                            return res.render('mon_activities', {
+                                title: 'FishBook - Collectors activities',
+                                username: req.username,
+                                admin: req.admin,                
+                                login_error: '',
+                                rfiddata_list: JSON.stringify(result)
+                            });
+
                         });
-
                     });
-                });
-                
+                });                
             });
         });
 
@@ -551,7 +611,23 @@ function ContentHandler (db) {
     }
 
     this.displayMonCollectors = function(req, res, next){
-        
+        institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+            collectors.getCollectors(function(err,result){
+                if(err) return next(err);
+                
+                for(var key in result){
+                    result[key].institution_name = institutions_hash[result[key].institution_id];
+                }
+
+                return res.render('mon_collectors', {
+                    title: 'FishBook - Collectors',
+                    username: req.username,
+                    admin: req.admin,
+                    login_error: '',
+                    collectors: JSON.stringify(result)
+                });
+            });
+        });
     }
 
 }

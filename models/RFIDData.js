@@ -23,7 +23,8 @@ function RFIDDataDAO(db) {
 	            identificationcode: rfid.identificationcode,
 				applicationcode: rfid.applicationcode,
 	            datetime: Date(rfid.datetime),
-	            md5hash: data.datasummary.md5diggest
+	            md5hash: data.datasummary.md5diggest,
+                macaddress: data.macaddress
 			};
 
 			RFIDData.insert(rfidData, function(err){
@@ -40,7 +41,7 @@ function RFIDDataDAO(db) {
     this.getRFIDData = function(num, callback) {
         "use strict";      
 
-        RFIDData.find().sort('date', -1).limit(num).toArray(function(err, items) {
+        RFIDData.find().sort('datetime', -1).limit(num).toArray(function(err, items) {
             "use strict";
 
             if (err) return callback(err, null);

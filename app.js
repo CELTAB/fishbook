@@ -52,6 +52,10 @@ MongoClient.connect('mongodb://localhost:27017/rfidmonitor', function(err, db) {
         socket.emit('rfiddata',data);
       });
 
+      collectorPointServer.ServerEmitter.on('collectors_status', function (data) {
+        socket.emit('collectors_status',data);
+      }); 
+
       socket.on('end', function (data) {
         console.log('Disconnect: '+data);
       });

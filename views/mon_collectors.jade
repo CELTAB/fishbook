@@ -1,0 +1,45 @@
+extends base_layout
+
+block scripts
+    script(src='/socket.io/socket.io.js')
+    script(type='text/javascript').
+        var socket = io.connect('http://179.106.217.28:8082/');
+
+        socket.on('connect', function(data){
+            console.log("Connected to Node.js Server");            
+        });
+
+        socket.on('collectors_status', function (data) {
+            console.log('collectors_status: ' + data.mac + ', ' + data.status);
+            var name = 'status_'+ data.mac;
+            var filter = 'td[name="' +name+ '"]';
+            $(filter).text(data.status);
+        });
+
+        socket.on('info', function (data) {
+            console.log('Info: ', data);            
+        });
+
+block append content
+  div(class="container ")
+    div(class="row")      
+      div(class="col-md-9")        
+        table(class="table")
+          thead
+            tr
+              th Institution
+              th Name
+              th MAC
+              th Description
+              th Status
+          tbody(id="tableBody")
+          -var jsonArray = JSON.parse(collectors)
+          for data in jsonArray
+            tr 
+              td= data.institution_name
+              td= data.name
+              td= data.mac
+              td= data.description
+              td(name="status_#{data.mac}")= data.status
+
+                       

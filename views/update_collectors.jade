@@ -1,0 +1,37 @@
+extends base_layout
+
+
+block append scripts
+    -var json = JSON.parse(collector);  
+    script(src='/js/jquery.min.js')
+    script(type='text/javascript').
+      $(document).ready(function(){
+        console.log('institution_id: ' + "#{json.institution_id}");
+        $('select[name="institution_id"]').val("#{json.institution_id}");       
+      });
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        form(role="form" method="post" action="/update_collectors")
+          div(class="form-group")
+
+            input(type="hidden" class="form-control" id="collector_id" name="collector_id" value="#{json._id}")
+
+            label(for="institution") Institution
+            select(name="institution_id" id="institution" class="form-control" value="#{json.institution_id}")
+                -var jsonArray = JSON.parse(institutions_list)
+                for data in jsonArray
+                  option(value=data._id) #{data.name}
+
+            label(for="collectorsName") Name
+            input(type="text" class="form-control" id="collectorsName" name="name" value="#{json.name}")
+
+            label(for="collectorsMAC") MAC
+            input(type="text" class="form-control" id="collectorsMAC" name="mac" value="#{json.mac}")
+
+            label(for="collectorDesc") Description
+            input(type="text" class="form-control" id="collectorDesc" name="description" value="#{json.description}")
+
+          button(type="submit" class="btn btn-default") Submit

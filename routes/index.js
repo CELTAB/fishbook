@@ -27,6 +27,7 @@ module.exports = exports = function(app, db) {
     app.get('/add_institutions', contentHandler.displayAddInstitutions);
     app.get('/add_species', contentHandler.displayAddSpecies);
     app.get('/add_collectors', contentHandler.displayAddCollectors);
+    app.get('/update_collectors/:id', contentHandler.displayUpdateCollectors);
     app.get('/add_tagged_fishes', contentHandler.displayAddTaggedFishes);
     app.get('/add_users', contentHandler.displayAddUsers);
 
@@ -35,6 +36,7 @@ module.exports = exports = function(app, db) {
     app.post('/add_species', contentHandler.handleAddSpecies);
     app.post('/add_collectors', contentHandler.handleAddCollectors);
     app.post('/add_tagged_fishes', contentHandler.handleAddTaggedFishes);
+    app.post('/update_collectors', contentHandler.handleUpdateCollectors);
     app.post('/add_users', contentHandler.handleAddUsers);
     app.post('/search_rfids', contentHandler.handleSearchRFIDs);
     app.post('/profile', contentHandler.handleProfile);
