@@ -4,6 +4,8 @@ block append scripts
     script(src='/js/jquery.min.js')
     script(type='text/javascript').
       $(document).ready(function(){
+        $("#tableBody tr").css('cursor', 'pointer');
+        
         $("#tableBody tr").click(function() {
           console.log('this.name: ' + $(this).attr('name'));
           window.location = "/update_collectors/" +$(this).attr('name');

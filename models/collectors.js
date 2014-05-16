@@ -44,6 +44,19 @@ function CollectorsDAO(db) {
         });
     }
 
+    this.remove = function (collector, callback) {
+        "use strict";        
+
+        collectors.remove({'_id': ObjectID(collector._id) }, function (err, result) {
+            "use strict";
+
+            if (err) return callback(err);
+
+            console.log("Removed new collector: " + ObjectID(collector._id));
+            callback(err);
+        });
+    }
+
     this.updateStatus = function (mac, status, callback) {
         "use strict";    
 

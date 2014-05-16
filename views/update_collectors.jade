@@ -10,28 +10,63 @@ block append scripts
         $('select[name="institution_id"]').val("#{json.institution_id}");       
       });
 
+      function updateSaveItem(){
+      console.log($('button[name="update"]').text());
+        if($('button[name="update"]').text() == "Update"){
+          $('button[name="delete"]').prop('disabled', true);
+          $('button[name="update"]').text("Save");
+          $('.form-control').prop('disabled', false);
+        }else{
+          $('button[name="delete"]').prop('disabled', false);
+          $('button[name="update"]').text("Update");
+          $('.form-control').prop('disabled', true);
+          //post
+          //$.post('/update_collectors', $('#updateForm').serialize() ,function(result){
+          var postData = { collector_id: $('#collector_id').val(),
+                           institution_id: $('#institution').val(),
+                           name: $('#collectorsName').val(),
+                           mac: $('#collectorsMAC').val(),
+                           description: $('#collectorDesc').val()
+          };
+          $.post('/update_collectors', postData, function(result){
+            window.location.replace('/collectors');
+          });
+        }
+      }
+
+      function deleteItem(){
+          var postData = {collector_id: $('#collector_id').val()}; 
+          $.post('/remove_collectors', postData, function(result){
+            window.location.replace('/collectors');
+          });
+      }
+
 block append content
   div(class="container")
     div(class="row")
       div(class="col-md-6")
-        form(role="form" method="post" action="/update_collectors")
+        button(name="update" onclick="javascript:updateSaveItem();" class="btn btn-default" type="submit") Update
+        button(name="delete" onclick="JavaScript:deleteItem();" class="btn btn-default") Delete
+    div(class="row")
+      div(class="col-md-6")
+        form(id="updateForm" role="form" method="post")
           div(class="form-group")
 
-            input(type="hidden" class="form-control" id="collector_id" name="collector_id" value="#{json._id}")
+            input(type="hidden" class="form-control" id="collector_id" name="collector_id" value="#{json._id}"  disabled="true")
 
             label(for="institution") Institution
-            select(name="institution_id" id="institution" class="form-control" value="#{json.institution_id}")
+            select(name="institution_id" id="institution" class="form-control" value="#{json.institution_id}" disabled="true")
                 -var jsonArray = JSON.parse(institutions_list)
                 for data in jsonArray
                   option(value=data._id) #{data.name}
 
             label(for="collectorsName") Name
-            input(type="text" class="form-control" id="collectorsName" name="name" value="#{json.name}")
+            input(type="text" class="form-control" id="collectorsName" name="name" value="#{json.name}" disabled="true")
 
             label(for="collectorsMAC") MAC
-            input(type="text" class="form-control" id="collectorsMAC" name="mac" value="#{json.mac}")
+            input(type="text" class="form-control" id="collectorsMAC" name="mac" value="#{json.mac}" disabled="true")
 
             label(for="collectorDesc") Description
-            input(type="text" class="form-control" id="collectorDesc" name="description" value="#{json.description}")
+            input(type="text" class="form-control" id="collectorDesc" name="description" value="#{json.description}" disabled="true")
 
-          button(type="submit" class="btn btn-default") Submit
+          // button(type="submit" class="btn btn-default") Submit

@@ -37,6 +37,7 @@ module.exports = exports = function(app, db) {
     app.post('/add_collectors', contentHandler.handleAddCollectors);
     app.post('/add_tagged_fishes', contentHandler.handleAddTaggedFishes);
     app.post('/update_collectors', contentHandler.handleUpdateCollectors);
+    app.post('/remove_collectors', contentHandler.handleRemoveCollectors);
     app.post('/add_users', contentHandler.handleAddUsers);
     app.post('/search_rfids', contentHandler.handleSearchRFIDs);
     app.post('/profile', contentHandler.handleProfile);

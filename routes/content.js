@@ -232,8 +232,6 @@ function ContentHandler (db) {
                 });            
             });
         });
-
-
     }   
 
     this.handleAddCollectors = function(req, res, next) {
@@ -269,10 +267,25 @@ function ContentHandler (db) {
             status: 'Offline'
         };
 
-        console.log('update collector: ' + JSON.stringify(collector));
-
         // even if there is no logged in user, we can still post a comment
         collectors.save(collector, function(err) {
+            "use strict";
+
+            if (err) return next(err);
+
+            return res.redirect("/collectors");
+        });
+    }
+
+    this.handleRemoveCollectors = function(req, res, next) {
+        "use strict";
+
+        var collector = {
+            _id: req.body.collector_id
+        };
+
+        // even if there is no logged in user, we can still post a comment
+        collectors.remove(collector, function(err) {
             "use strict";
 
             if (err) return next(err);

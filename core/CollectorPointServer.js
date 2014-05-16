@@ -64,7 +64,7 @@ module.exports = function(SocketIO, db){
 				console.log("Size of packet = " + size + " /  Size of data = " + data.length);
 
 				var jsonString = data.slice(8, data.length).toString();
-			  message = JSON.parse(jsonString);
+			 	message = JSON.parse(jsonString);
 			} catch (e) {
 			  console.log("Error on JSON.parse: " + e);
 			  console.log("Message : " + data.toString());
