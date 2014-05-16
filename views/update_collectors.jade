@@ -1,13 +1,26 @@
 extends base_layout
 
+block append stylesheets
+  link(href="/css/map.css" rel="stylesheet")
 
 block append scripts
     -var json = JSON.parse(collector);  
     script(src='/js/jquery.min.js')
+    script(src='https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false')  
     script(type='text/javascript').
+
+      var latDefault = "#{json.lat}";
+      var lngDefault = "#{json.lng}";
+      var marker = null;
+      
+      var latLng;
+      var map;
+
       $(document).ready(function(){
-        console.log('institution_id: ' + "#{json.institution_id}");
-        $('select[name="institution_id"]').val("#{json.institution_id}");       
+        $('select[name="institution_id"]').val("#{json.institution_id}"); 
+        $('input[id="collectorLocation"]').val("#{json.lat},#{json.lng}");
+        latDefault = "#{json.lat}";
+        lngDefault = "#{json.lng}";
       });
 
       function updateSaveItem(){
@@ -26,7 +39,8 @@ block append scripts
                            institution_id: $('#institution').val(),
                            name: $('#collectorsName').val(),
                            mac: $('#collectorsMAC').val(),
-                           description: $('#collectorDesc').val()
+                           description: $('#collectorDesc').val(),
+                           location: $('#collectorLocation').val()
           };
           $.post('/update_collectors', postData, function(result){
             window.location.replace('/collectors');
@@ -39,6 +53,59 @@ block append scripts
           $.post('/remove_collectors', postData, function(result){
             window.location.replace('/collectors');
           });
+      }
+
+
+
+      function initialize() {
+        latLng = new google.maps.LatLng(latDefault, lngDefault);
+        var mapOptions = {
+          zoom: 8,
+          center: latLng,
+          mapTypeId: google.maps.MapTypeId.HYBRID
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+        $("#mapModal").on("shown.bs.modal", function () {
+            google.maps.event.trigger(map, "resize");
+            map.setCenter(latLng);
+            console.log('resize: latLong: ' + latLng);
+        });
+
+        create_marker(latLng);
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+      
+      google.maps.event.addDomListener(window, 'resize', function() {
+          map.setCenter(latLng);
+          console.log('resize: latLong: ' + latLng);
+      });
+
+      function create_marker(latLng){
+        marker = new google.maps.Marker({
+          map: map,
+            draggable: true 
+        });
+
+        marker.setPosition(latLng);
+        map.setZoom(8);
+        
+        google.maps.event.addListener(map, "click", function(event) {
+          marker.setPosition(event.latLng);
+        });
+        google.maps.event.addListener(marker, "drag", function(event) {
+          marker.setPosition(event.latLng);
+        });
+        
+        map.setCenter(latLng);
+      }     
+
+      function saveChanges(){
+        console.log('Save Google Maps new Location');
+        var newLatLong = marker.getPosition();
+        var position = newLatLong.lat() + ',' + newLatLong.lng();
+        $('input[id="collectorLocation"]').val(position);
       }
 
 block append content
@@ -67,6 +134,26 @@ block append content
             input(type="text" class="form-control" id="collectorsMAC" name="mac" value="#{json.mac}" disabled="true")
 
             label(for="collectorDesc") Description
-            input(type="text" class="form-control" id="collectorDesc" name="description" value="#{json.description}" disabled="true")
+            input(type="text" class="form-control" id="collectorDesc" name="description" value="#{json.description}" disabled="true")        
 
-          // button(type="submit" class="btn btn-default") Submit
+            div(class="row")
+              div(class="col-md-10")
+                label(for="collectorLocation") Location
+                input(type="text" class="form-control" id="collectorLocation" name="location" disabled=true)
+              div(class="col-md-1")
+                a(data-toggle="modal" data-target="#mapModal" class="btn btn-default btn-margin") Mapa
+    div(class="row")
+      div(class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true")
+        div(class="modal-dialog")
+          div(class="modal-content")
+            div(class="modal-header")
+              button(type="button" class="close" data-dismiss="modal" aria-hidden="true") x
+              h4(class="modal-title" id="myModalLabel") Modal title
+
+            div(class="modal-body")
+              div(id="mapCanvasRow" class="row")
+                div(class="col-md-12")
+                  div(class="google-map-canvas" id="map-canvas")   
+            div(class="modal-footer")
+              button(type="button" class="btn btn-default" data-dismiss="modal") Close
+              button(type="button" class="btn btn-primary" onclick="javascript:saveChanges();") Save changes

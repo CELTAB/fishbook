@@ -94,3 +94,8 @@ body {
   height: 300px;
   width: auto;
 }
+
+.btn-margin {
+    margin-top: 24px;
+    margin-bottom: 10px;
+}

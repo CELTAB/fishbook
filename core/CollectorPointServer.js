@@ -43,12 +43,14 @@ module.exports = function(SocketIO, db){
 			collectors.getCollectorByMac(socket.CollectorMAC, function(err, doc){
 				if(err) return err;
 
-				var collectorStatus = {
-					name: doc.name,
-					mac: doc.mac,
-					status: 'Offline'
-				};
-				serverEmitter.emit('collectors_status', collectorStatus);	
+				if(doc){
+					var collectorStatus = {
+						name: doc.name,
+						mac: doc.mac,
+						status: 'Offline'
+					};
+					serverEmitter.emit('collectors_status', collectorStatus);	
+				}	
 			});			
 		});
 	
@@ -212,10 +214,24 @@ module.exports = function(SocketIO, db){
 		});
 	});
 
-	serverEmitter.on('rfiddata', function(data){
-		console.log('serverEmitter.on: '+JSON.stringify(data));
-	});
-
+	var summaryUpdate = function(){
+		var summary = {
+			collectors: [{
+				name: '',
+				lat: 12,
+				lon: 13,
+				status: ''
+			}],
+			rfiddata: [{
+				institution_name: '',
+				species_name: '',
+				collector_name: '',
+				pit_tag: 12346,
+				datetime: ''
+			}]
+		};
+		serverEmitter.emit('summary', summary );	
+	}
 
 	var startServer = function(){
 		server.listen(8124, function() { //'listening' listener

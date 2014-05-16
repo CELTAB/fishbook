@@ -236,12 +236,15 @@ function ContentHandler (db) {
 
     this.handleAddCollectors = function(req, res, next) {
         "use strict";
+        var location = req.body.location.split(',');
 
         var collector = {
             institution_id: req.body.institution_id,
             name: req.body.name,
             mac: req.body.mac,
             description : req.body.description,
+            lat: location[0],
+            lng: location[1],
             status: 'Offline'
         };
 
@@ -258,12 +261,16 @@ function ContentHandler (db) {
     this.handleUpdateCollectors = function(req, res, next) {
         "use strict";
 
+        var location = req.body.location.split(',');
+
         var collector = {
             _id: req.body.collector_id,
             institution_id: req.body.institution_id,
             name: req.body.name,
             mac: req.body.mac,
             description : req.body.description,
+            lat: location[0],
+            lng: location[1],
             status: 'Offline'
         };
 

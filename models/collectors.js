@@ -32,7 +32,10 @@ function CollectorsDAO(db) {
                                 'name': collector.name, 
                                 'institution_id': collector.institution_id,
                                 'mac':collector.mac,
-                                'description':collector.description }};
+                                'description': collector.description,
+                                'lat': collector.lat,
+                                'lng': collector.lng
+        }};
 
         collectors.update({'_id': ObjectID(collector._id) }, newObject, function (err, result) {
             "use strict";

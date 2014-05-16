@@ -8,8 +8,8 @@ block append scripts
   script(src='https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false')
 
   script(). 
-    var latDefault = "-24.77031290445274";
-    var lngDefault = "-54.36337910592556";
+    var latDefault = "-25.436090554971567";
+    var lngDefault = "-54.59424287080765";
     var markers=[];
     
     var latLng;
@@ -36,7 +36,7 @@ block append scripts
       });
 
       marker.setPosition(latLng);
-      map.setZoom(8);
+      map.setZoom(14);
       
       google.maps.event.addListener(map, "click", function(event) {
         marker.setPosition(event.latLng);
