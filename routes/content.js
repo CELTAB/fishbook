@@ -857,6 +857,10 @@ function ContentHandler (db) {
         });
     }
 
+    this.sendCollectionSummary = function(req, res, next){
+
+    }
+
 }
 
 module.exports = ContentHandler;
