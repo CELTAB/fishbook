@@ -1,0 +1,55 @@
+extends base_layout
+
+block append scripts
+    -var json = JSON.parse(species_item);  
+    script(src='/js/jquery.min.js')
+    script(type='text/javascript').
+
+      function updateSaveItem(){
+      console.log($('button[name="update"]').text());
+        if($('button[name="update"]').text() == "Update"){
+          $('button[name="delete"]').prop('disabled', true);
+          $('button[name="update"]').text("Save");
+          $('.form-control').prop('disabled', false);
+        }else{
+          $('button[name="delete"]').prop('disabled', false);
+          $('button[name="update"]').text("Update");
+          $('.form-control').prop('disabled', true);
+  
+          var postData = { species_id: $('#species_id').val(),
+                           name: $('#specieName').val(),
+                           image_name: $('#fishImage').val()
+          };
+          $.post('/update_species', postData, function(result){
+            window.location.replace('/species');
+          });
+        }
+      }
+
+      function deleteItem(){
+          var postData = {species_id: $('#species_id').val()}; 
+          $.post('/remove_species', postData, function(result){
+            window.location.replace('/species');
+          });
+      }
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        button(name="update" onclick="javascript:updateSaveItem();" class="btn btn-default" type="submit") Update
+        button(name="delete" onclick="JavaScript:deleteItem();" class="btn btn-default") Delete
+    div(class="row")
+      div(class="col-md-6")
+        form(id="updateForm" role="form" method="post")
+          input(type="hidden" class="form-control" id="species_id" name="species_id" value="#{json._id}" disabled="true")
+
+          div(class="form-group")
+            label(for="specieName") Name
+            input(type="text" value="#{json.name}" class="form-control" id="specieName" name="name" disabled="true")
+
+          div(class="form-group")
+            label(for="fishImage") Species image
+            input(type="file" id="fishImage" name="image")
+            if json.image
+                 img(class="img-rounded img-custom-small" src='/uploads/images/'+json.image)

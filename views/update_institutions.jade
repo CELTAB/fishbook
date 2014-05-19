@@ -1,0 +1,153 @@
+extends base_layout
+
+block append stylesheets
+  link(href="/css/map.css" rel="stylesheet")
+
+block append scripts
+    -var json = JSON.parse(institution_item);  
+    script(src='/js/jquery.min.js')
+    script(src='https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false')  
+    script(type='text/javascript').
+
+      var latDefault = "#{json.lat}";
+      var lngDefault = "#{json.lng}";
+      var marker = null;
+      
+      var latLng;
+      var map;
+
+      $(document).ready(function(){
+        $('select[name="institution_id"]').val("#{json.institution_id}"); 
+        $('input[id="institutionLocation"]').val("#{json.lat},#{json.lng}");
+        latDefault = "#{json.lat}";
+        lngDefault = "#{json.lng}";
+      });
+
+      function updateSaveItem(){
+      console.log($('button[name="update"]').text());
+        if($('button[name="update"]').text() == "Update"){
+          $('button[name="delete"]').prop('disabled', true);
+          $('button[name="update"]').text("Save");
+          $('.form-control').prop('disabled', false);
+        }else{
+          $('button[name="delete"]').prop('disabled', false);
+          $('button[name="update"]').text("Update");
+          $('.form-control').prop('disabled', true);
+
+          var postData = { institution_id: $('#institution_id').val(),
+                           name: $('#instName').val(),
+                           image_name: $('#idImg').val(),
+                           location: $('#institutionLocation').val()
+          };
+          $.post('/update_institutions', postData, function(result){
+            window.location.replace('/institutions');
+          });
+        }
+      }
+
+      function deleteItem(){
+          var postData = {institution_id: $('#institution_id').val()}; 
+          $.post('/remove_institutions', postData, function(result){
+            window.location.replace('/institutions');
+          });
+      }
+
+
+
+      function initialize() {
+        latLng = new google.maps.LatLng(latDefault, lngDefault);
+        var mapOptions = {
+          zoom: 8,
+          center: latLng,
+          mapTypeId: google.maps.MapTypeId.HYBRID
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+        $("#mapModal").on("shown.bs.modal", function () {
+            google.maps.event.trigger(map, "resize");
+            map.setCenter(latLng);
+            console.log('resize: latLong: ' + latLng);
+        });
+
+        create_marker(latLng);
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+      
+      google.maps.event.addDomListener(window, 'resize', function() {
+          map.setCenter(latLng);
+          console.log('resize: latLong: ' + latLng);
+      });
+
+      function create_marker(latLng){
+        marker = new google.maps.Marker({
+          map: map,
+            draggable: true 
+        });
+
+        marker.setPosition(latLng);
+        map.setZoom(8);
+        
+        google.maps.event.addListener(map, "click", function(event) {
+          marker.setPosition(event.latLng);
+        });
+        google.maps.event.addListener(marker, "drag", function(event) {
+          marker.setPosition(event.latLng);
+        });
+        
+        map.setCenter(latLng);
+      }     
+
+      function saveChanges(){
+        console.log('Save Google Maps new Location');
+        var newLatLong = marker.getPosition();
+        var position = newLatLong.lat() + ',' + newLatLong.lng();
+        $('input[id="institutionLocation"]').val(position);
+      }
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        button(name="update" onclick="javascript:updateSaveItem();" class="btn btn-default" type="submit") Update
+        button(name="delete" onclick="JavaScript:deleteItem();" class="btn btn-default") Delete
+    div(class="row")
+      div(class="col-md-6")
+        form(id="updateForm" role="form" method="post")
+          div(class="form-group")
+
+            input(type="hidden" class="form-control" id="institution_id" name="institution_id" value="#{json._id}"  disabled="true")
+
+          div(class="form-group")
+            label(for="instName") Name
+            input(type="text" value="#{json.name}" class="form-control" id="instName" name="name" disabled="true")
+
+
+          div(class="form-group")
+            label(for="idImg") Logo file
+            input(type="file" id="idImg" name="imgSrc")
+            if json.image_name
+                   img(class="img-rounded img-custom-small" src='/uploads/images/'+json.image_name)
+
+          div(class="row")
+              div(class="col-md-10")
+                label(for="institutionLocation") Location
+                input(type="text" value="#{json.location}" class="form-control" id="institutionLocation" name="location" disabled=true)
+              div(class="col-md-1")
+                a(data-toggle="modal" data-target="#mapModal" class="btn btn-default btn-margin") Mapa
+
+    div(class="row")
+      div(class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true")
+        div(class="modal-dialog")
+          div(class="modal-content")
+            div(class="modal-header")
+              button(type="button" class="close" data-dismiss="modal" aria-hidden="true") x
+              h4(class="modal-title" id="myModalLabel") Modal title
+
+            div(class="modal-body")
+              div(id="mapCanvasRow" class="row")
+                div(class="col-md-12")
+                  div(class="google-map-canvas" id="map-canvas")   
+            div(class="modal-footer")
+              button(type="button" class="btn btn-default" data-dismiss="modal") Close
+              button(type="button" class="btn btn-primary" onclick="javascript:saveChanges();") Save changes

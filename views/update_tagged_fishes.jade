@@ -1,0 +1,96 @@
+extends base_layout
+
+block append scripts
+    -var json = JSON.parse(tagged_fish);  
+    script(src='/js/jquery.min.js')
+    script(type='text/javascript').
+
+      $(document).ready(function(){
+        $('#taggedSpecies').val("#{json.species_id}");
+        $('#taggedInstitution').val("#{json.institution_id}");
+      });
+
+      function updateSaveItem(){
+      console.log($('button[name="update"]').text());
+        if($('button[name="update"]').text() == "Update"){
+          $('button[name="delete"]').prop('disabled', true);
+          $('button[name="update"]').text("Save");
+          $('.form-control').prop('disabled', false);
+        }else{
+          $('button[name="delete"]').prop('disabled', false);
+          $('button[name="update"]').text("Update");
+          $('.form-control').prop('disabled', true);
+          
+          var postData = {  tagged_fish_id : $('#tagged_fish_id').val(),
+                            species_id : $('#taggedSpecies').val(),
+                            pit_tag : $('#taggedPIT').val(),
+                            capture_local : $('#taggedCap').val(),
+                            release_local : $('#taggedRel').val(),
+                            total_length : $('#taggedTotalLen').val(),
+                            default_length : $('#taggedDefLen').val(),
+                            weight : $('#taggedWeight').val(),
+                            sex : $('#taggedSex').val(),
+                            observation : $('#taggedObs').val(),
+                            institution_id : $('#taggedInstitution').val()
+
+          };
+          $.post('/update_tagged_fishes', postData, function(result){
+            window.location.replace('/tagged_fishes');
+          });
+        }
+      }
+
+      function deleteItem(){
+          var postData = {tagged_fish_id: $('#tagged_fish_id').val()}; 
+          $.post('/remove_tagged_fishes', postData, function(result){
+            window.location.replace('/tagged_fishes');
+          });
+      }
+
+block append content
+  div(class="container")
+    div(class="row")
+      div(class="col-md-6")
+        button(name="update" onclick="javascript:updateSaveItem();" class="btn btn-default" type="submit") Update
+        button(name="delete" onclick="JavaScript:deleteItem();" class="btn btn-default") Delete
+    div(class="row")
+      div(class="col-md-6")
+        form(id="updateForm" role="form" method="post")
+            
+            input(type="hidden" class="form-control" id="tagged_fish_id" name="tagged_fish_id" value="#{json._id}" disabled="true")
+
+            label(for="taggedSpecies") Species
+            select(name="species_id" id="taggedSpecies" class="form-control" disabled="true" )
+                -var jsonArray = JSON.parse(species_list)
+                for data in jsonArray
+                  option(value="#{data._id}") #{data.name}
+
+            label(for="taggedInstitution") Institution
+            select(name="institution_id" id="taggedInstitution" class="form-control" disabled="true" )
+                -var jsonArray = JSON.parse(institutions_list)
+                for data in jsonArray
+                  option(value="#{data._id}") #{data.name}
+
+            label(for="taggedPIT") PIT Tag
+            input(type="text" value="#{json.pit_tag}" disabled="true" class="form-control" id="taggedPIT" name="pit_tag")
+
+            label(for="taggedCap") Capture Local
+            input(type="text" value="#{json.capture_local}" disabled="true" class="form-control" id="taggedCap" name="capture_local")
+
+            label(for="taggedRel") Release Local
+            input(type="text" value="#{json.release_local}" disabled="true" class="form-control" id="taggedRel" name="release_local")
+
+            label(for="taggedTotalLen") Total Length
+            input(type="text" value="#{json.total_length}" disabled="true" class="form-control" id="taggedTotalLen" name="total_length")
+
+            label(for="taggedDefLen") Default Length
+            input(type="text" value="#{json.default_length}" disabled="true" class="form-control" id="taggedDefLen" name="default_length")
+
+            label(for="taggedWeight") Weight
+            input(type="text" value="#{json.weight}" disabled="true" class="form-control" id="taggedWeight" name="weight")
+
+            label(for="taggedSex") Sex
+            input(type="text" value="#{json.sex}" disabled="true" class="form-control" id="taggedSex" name="sex")
+
+            label(for="taggedObs") Observation
+            input(type="text" value="#{json.observation}" disabled="true" class="form-control" id="taggedObs" name="observation")
