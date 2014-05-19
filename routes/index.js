@@ -43,6 +43,9 @@ module.exports = exports = function(app, db) {
     app.post('/profile', contentHandler.handleProfile);
     app.post('/import', contentHandler.handleImport);
 
+    // Collectors Summary JSON Service
+    app.get('/collectors_summary', contentHandler.sendCollectionSummary);
+
 
     // Authentication
     app.post('/login', sessionHandler.handleLoginRequest);

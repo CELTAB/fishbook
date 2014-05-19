@@ -78,12 +78,25 @@ function ContentHandler (db) {
     this.displayMainPage = function(req, res, next) {
         "use strict";
 
-        return res.render('home', {
-            title: 'FishBook - Home',
-            username: req.username,
-            admin: '',
-            login_error: ''
+        institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+            collectors.getCollectors(function(err,result){
+                if(err) return next(err);
+                
+                for(var key in result){
+                    result[key].institution_name = institutions_hash[result[key].institution_id];
+                }
+
+                return res.render('home', {
+                    title: 'FishBook - Home',
+                    username: req.username,
+                    admin: '',
+                    login_error: '',
+                    collectors: JSON.stringify(result)
+                });
+            });
         });
+
+
     }
 
     /* Institutions RESTful*/
@@ -236,6 +249,7 @@ function ContentHandler (db) {
 
     this.handleAddCollectors = function(req, res, next) {
         "use strict";
+        console.log("location: " + req.body.location);
         var location = req.body.location.split(',');
 
         var collector = {
