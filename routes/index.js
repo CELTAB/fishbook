@@ -55,6 +55,9 @@ module.exports = exports = function(app, db) {
     app.post('/search_rfids', contentHandler.handleSearchRFIDs);
     app.post('/import', contentHandler.handleImport);
 
+    // Collectors Summary JSON Service
+    app.get('/collectors_summary', contentHandler.sendCollectionSummary);
+
 
     // Authentication
     app.post('/login', sessionHandler.handleLoginRequest);

@@ -85,7 +85,7 @@ block append content
             div(class="row")
               div(class="col-md-10")
                 label(for="collectorLocation") Location
-                input(type="text" class="form-control" id="collectorLocation" name="location" disabled=true)
+                input(type="text" class="form-control" id="collectorLocation" name="location" readonly)
               div(class="col-md-1")
                 a(data-toggle="modal" data-target="#mapModal" class="btn btn-default btn-margin") Mapa
 
@@ -96,7 +96,7 @@ block append content
         div(class="modal-content")
           div(class="modal-header")
             button(type="button" class="close" data-dismiss="modal" aria-hidden="true") x
-            h4(class="modal-title" id="myModalLabel") Modal title
+            h4(class="modal-title" id="myModalLabel") Collector Point Location
 
           div(class="modal-body")
             div(id="mapCanvasRow" class="row")
