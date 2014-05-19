@@ -690,78 +690,136 @@ function ContentHandler (db) {
         "use strict";
 
         var query = new Object;
+        var post_obj = {
+            'collector_id' : req.body.collector_id,
+            'species_id' : req.body.species_id,
+            'institution_id' : req.body.institution_id,
+            'tag' : req.body.tag,
+            'sortBy' : req.body.sortBy,
+            'sortOrder' : req.body.sortOrder,
+            'results_limit' : req.body.results_limit,
+            'exportToCSV' : req.body.exportToCSV
+        };
 
-        var collector_id = req.body.collector_id;
-        var species_id = req.body.species_id;
-        var institution_id = req.body.institution_id;
-        var tag = parseInt(req.body.tag);
-        var sortBy = req.body.sortBy;
-        var sortOrder = parseInt(req.body.sortOrder);
-        var results_limit = parseInt(req.body.results_limit);
-        var exportToCSV = req.body.exportToCSV;
+        var collector_id = post_obj.collector_id;
+        var tag = parseInt(post_obj.tag);
+        var sortBy = post_obj.sortBy;
+        var sortOrder = parseInt(post_obj.sortOrder);
+        var results_limit = parseInt(post_obj.results_limit);
+        var exportToCSV = post_obj.exportToCSV;
 
 
         if(tag)
             query.identificationcode = tag;
-        // if(collector_id)
-        //     query.xxxx = collector_id;
-        // if(species_id)
-        //     query.xxxx = species_id;
-        // if(institution_id)
-        //     query.xxxx = institution_id;
+        if(collector_id)
+            query.idcollectorpoint = collector_id;
 
 
-        collectors.getCollectorsIdNameHash(function(err, collectors_hash){
-             species.getSpeciesIdNameHash(function(err, species_hash){
-                 institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
-                     rfidadata.findRFIDData(query, sortBy, sortOrder, results_limit, function(err,result){
-                         if(err) return next(err);
- 
-                         for(var key in result){
-                             result[key].institution_name = institutions_hash[result[key].institution_id];
-                             result[key].species_name = species_hash[result[key].species_id];
-                             result[key].collector_name = species_hash[result[key].collector_id];
-                         }
- 
-                         if(exportToCSV){
-                             json2csv(
-                                 {
-                                     data: result, 
-                                     fields: ['idcollectorpoint', 
-                                         'idantena', 
-                                         'identificationcode',
-                                         'applicationcode',
-                                         'datetime']}, function(err, csv) {
-                                 if (err) return next(err);
-                                 
-                                 var appDir = path.dirname(require.main.filename);
-                                 var wstream = fs.createWriteStream(appDir + '/public/downloads/export.csv');
-                                 wstream.write(csv);
-                                 wstream.end(function(){
-                                     res.download(appDir + '/public/downloads/export.csv');    
-                                 });
-                                 
-                             });
-                         }else{
-                             species.getSpecies(function(err, species_list){
-                                 institutions.getInstitutions(function(err, institutions_list){
-                                     collectors.getCollectors(function(err, collectors_list){
-                                         return res.render('search_rfids', {
-                                             title: 'FishBook - Search/Export Data',
-                                             username: req.username,
-                                             admin: req.admin,                
-                                             login_error: '',
-                                             result_list: JSON.stringify(result),
-                                             species_list: JSON.stringify(species_list),
-                                             institutions_list: JSON.stringify(institutions_list),
-                                             collectors_list: JSON.stringify(collectors_list)
+        collectors.getCollectorsMacNameHash(function(err, collectors_hash){
+            species.getSpeciesIdNameHash(function(err, species_hash){
+                institutions.getInstitutionsIdNameHash(function(err, institutions_hash){
+                    tagged_fishes.getTaggedFishesByPitTagHash(function(err, tagged_fish_hash){
+                        rfidadata.findRFIDData(query, sortBy, sortOrder, results_limit, function(err,result){
+                             if(err) return next(err);
+     
+                             for(var key in result){
+
+                                console.log('key' + key);
+                                
+                                var institution_id = collectors_hash[result[key].macaddress].institution_id;
+                                if(post_obj.institution_id && post_obj.institution_id != institution_id){
+                                    //if an institution was specified on search parameters,
+                                    //and if it is different of the actual result key, so it is
+                                    //not valid.
+                                    result.splice(key, 1);
+                                    continue;
+                                }
+
+                                var species_id = tagged_fish_hash[result[key].identificationcode].species_id;
+                                if(post_obj.species_id && post_obj.species_id != species_id){
+                                    //if a species was specified on search parameters,
+                                    //and if it is different of the actual result key, so it is
+                                    //not valid.
+                                    result.splice(key, 1);
+                                    continue;
+                                }
+
+                                // If institution_id is null, the Institution is unknown
+                                if(institution_id){
+                                    result[key].institution_name = institutions_hash[institution_id];
+                                }else{
+                                    result[key].institution_name = 'Unknown';
+                                }
+
+                                result[key].species_name = species_hash[species_id];
+                                result[key].collector_name = collectors_hash[result[key].macaddress].name;
+                                console.log('rfiddata: ' + JSON.stringify(result[key]));
+                             }
+                            
+                            if(result.length > 0 ){
+                            
+                                if(exportToCSV){
+                                
+                                         json2csv(
+                                             {
+                                                 data: result, 
+                                                 fields: ['idcollectorpoint', 
+                                                     'idantena', 
+                                                     'identificationcode',
+                                                     'applicationcode',
+                                                     'datetime']}, function(err, csv) {
+                                             if (err) return next(err);
+                                             
+                                             var appDir = path.dirname(require.main.filename);
+                                             var wstream = fs.createWriteStream(appDir + '/public/downloads/export.csv');
+                                             wstream.write(csv);
+                                             wstream.end(function(){
+                                                 res.download(appDir + '/public/downloads/export.csv');    
+                                             });
+                                             
                                          });
-                                     });
-                                 });   
-                             });
-                         }            
-                     });
-                 });
+                                    // }
+                                 }else{
+                                    species.getSpecies(function(err, species_list){
+                                        institutions.getInstitutions(function(err, institutions_list){
+                                            collectors.getCollectors(function(err, collectors_list){
+                                                 return res.render('search_rfids', {
+                                                 title: 'FishBook - Search/Export Data',
+                                                 username: req.username,
+                                                 admin: req.admin,                
+                                                 result_status: '',
+                                                 result_list: JSON.stringify(result),
+                                                 species_list: JSON.stringify(species_list),
+                                                 institutions_list: JSON.stringify(institutions_list),
+                                                 collectors_list: JSON.stringify(collectors_list),
+                                                 old_post : post_obj
+                                                });
+                                            });
+                                        });   
+                                    });
+                                }
+                            }else{
+                                species.getSpecies(function(err, species_list){
+                                    institutions.getInstitutions(function(err, institutions_list){
+                                        collectors.getCollectors(function(err, collectors_list){
+                                            return res.render('search_rfids', {
+                                                 title: 'FishBook - Search/Export Data',
+                                                 username: req.username,
+                                                 admin: req.admin,                
+                                                 result_status: 'No results found.',
+                                                 result_list: '[]',
+                                                 species_list: JSON.stringify(species_list),
+                                                 institutions_list: JSON.stringify(institutions_list),
+                                                 collectors_list: JSON.stringify(collectors_list),
+                                                 old_post : post_obj
+                                            });
+                                        });
+                                    });   
+                                });
+                            }           
+                        });
+                    });
+                });
             });
         });
     }

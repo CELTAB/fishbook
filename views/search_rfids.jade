@@ -1,6 +1,37 @@
 extends base_layout
 
 block append content
+
+
+  -var collector_id = '';
+  -var species_id = '';
+  -var institution_id = '';
+  -var tag = '';
+  -var sortBy = '';
+  -var sortOrder = '';
+  -var results_limit = '';
+  -var exportToCSV = '';
+  
+  if old_post
+    -collector_id = old_post.collector_id;  
+    -species_id = old_post.species_id;
+    -institution_id = old_post.institution_id;
+    -tag = old_post.tag;
+    -sortBy = old_post.sortBy;
+    -sortOrder = old_post.sortOrder;
+    -results_limit = old_post.results_limit;
+    -exportToCSV = old_post.exportToCSV;
+    script(src='/js/jquery.min.js')
+    script.
+      $(document).ready(function(){
+        $("#collectorID").val("#{collector_id}");
+        $("#speciesID").val("#{species_id}");
+        $("#institutionID").val("#{institution_id}");
+        $("#sortBy").val("#{sortBy}");
+        $("#sortOrder").val("#{sortOrder}");
+      });
+
+
   div(class="container")
     div(class="row")
       div(class="col-md-9")
@@ -31,14 +62,14 @@ block append content
                     option(value="#{data._id}") #{data.name}
 
                 label(for="tag") TAG
-                input(type="text" class="form-control" id="tag" name="tag")
+                input(type="text" value="#{tag}" class="form-control" id="tag" name="tag")
 
                 
 
               div(class="col-md-6")
 
                 label(for="limit") Limit of results
-                input(type="text" class="form-control" id="limit" name="results_limit")
+                input(type="text" value="#{results_limit}" class="form-control" id="limit" name="results_limit")
 
                 label(for="sortBy") Sort By
                 select(name="sortBy" id="sortBy" class="form-control")
@@ -61,6 +92,9 @@ block append content
             div(class="col-md-1")
               button(type="submit" class="btn btn-default btn-custom") Search
               //button(type="button" id="exportToCSV" class="btn btn-default btn-custom") Export to CSV
+      if result_status
+        div(class="col-md-9") #{result_status}
+
       if(result_list != '[]')
         div(class="col-md-9")        
           table(class="table")
