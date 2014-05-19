@@ -26,11 +26,9 @@ block append content
               th Species
               th PIT Tag
               th Capture Local
+              th Capture Date
               th Release Local
-              th Total Length
-              th Default Length
-              th Weight
-              th Sex
+              th Release Date
               th Observation
           tbody(id="tableBody")
             -var jsonArray = JSON.parse(tagged_fishes)
@@ -40,9 +38,7 @@ block append content
                 td= data.species_name
                 td= data.pit_tag
                 td= data.capture_local
+                td= data.capture_date
                 td= data.release_local
-                td= data.total_length
-                td= data.default_length
-                td= data.weight
-                td= data.sex
+                td= data.release_date
                 td= data.observation

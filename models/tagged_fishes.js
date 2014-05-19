@@ -12,23 +12,8 @@ function TaggedFishesDAO(db) {
 
     var tagged_fishes = db.collection("tagged_fishes");
 
-    this.add = function (species_id, pit_tag, capture_local,
-                         release_local, total_length, default_length,
-                         weight, sex, observation, institution_id, callback) {
+    this.add = function (tagged_fish, callback) {
         "use strict";
-        
-        var tagged_fish = {
-            "species_id" : species_id,
-            "pit_tag" : parseInt(pit_tag),
-            "capture_local": capture_local,
-            "release_local": release_local,
-            "total_length": total_length,
-            "default_length": default_length,
-            "weight" : weight,
-            "sex": sex,
-            "observation": observation,
-            "institution_id": institution_id
-        }
 
         tagged_fishes.insert(tagged_fish, function (err, result) {
             "use strict";
@@ -122,7 +107,7 @@ function TaggedFishesDAO(db) {
     }
 
     this.save = function (tagged_fish_obj, callback) {
-        "use strict";        
+        "use strict";     
 
         var newObject = {'$set': {
                             'species_id' : tagged_fish_obj.species_id,
@@ -134,7 +119,9 @@ function TaggedFishesDAO(db) {
                             'weight' : tagged_fish_obj.weight,
                             'sex' : tagged_fish_obj.sex,
                             'observation' : tagged_fish_obj.observation,
-                            'institution_id' : tagged_fish_obj.institution_id
+                            'institution_id' : tagged_fish_obj.institution_id,
+                            'release_date' : tagged_fish_obj.release_date,
+                            'capture_date' : tagged_fish_obj.capture_date
 
         }};
 

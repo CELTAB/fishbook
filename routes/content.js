@@ -492,22 +492,34 @@ function ContentHandler (db) {
 
     this.handleAddTaggedFishes = function(req, res, next) {
         "use strict";
-     
-        var species_id = req.body.species_id;   
-        var institution_id = req.body.institution_id;
-        var pit_tag = req.body.pit_tag;
-        var capture_local = req.body.capture_local;
-        var release_local = req.body.release_local;
-        var total_length = req.body.total_length;
-        var default_length = req.body.default_length;
-        var weight = req.body.weight;
-        var sex = req.body.sex;
-        var observation = req.body.observation;
+
+        
+        var release_date = req.body.release_date.split('-');
+
+
+        var tagged_fish = {
+            species_id : req.body.species_id,   
+            institution_id : req.body.institution_id,
+            pit_tag : parseInt(req.body.pit_tag),
+            capture_local : req.body.capture_local,
+            release_local : req.body.release_local,
+            total_length : req.body.total_length,
+            default_length : req.body.default_length,
+            weight : req.body.weight,
+            sex : req.body.sex,
+            observation : req.body.observation
+        };
+
+        if(req.body.capture_date){
+            tagged_fish.capture_date = req.body.capture_date;
+        }
+
+        if(req.body.release_date){
+            tagged_fish.release_date = req.body.release_date;
+        }      
 
         // even if there is no logged in user, we can still post a comment
-        tagged_fishes.add(  species_id, pit_tag, capture_local, release_local,
-                            total_length, default_length, weight, sex, 
-                            observation, institution_id, function(err) {
+        tagged_fishes.add(tagged_fish, function(err) {
             "use strict";
 
             if (err) return next(err);
@@ -523,6 +535,8 @@ function ContentHandler (db) {
             institutions.getInstitutions(function(err, institutions_list){
                 tagged_fishes.getTaggedFishesById(req.params.id,  function(err, tagged_fish){
                     if (err) throw err;
+
+                    //tagged_fish.release_date = tagged_fish.release_date.toISOString().substr(0,10);
                                   
                     return res.render('update_tagged_fishes', {
                         title: 'FishBook - Update Tagged Fishes',
@@ -553,6 +567,14 @@ function ContentHandler (db) {
                             observation : req.body.observation,
                             institution_id : req.body.institution_id
         };
+
+        if(req.body.capture_date){
+            tagged_fish_obj.capture_date = req.body.capture_date;
+        }
+
+        if(req.body.release_date){
+            tagged_fish_obj.release_date = req.body.release_date;
+        }  
 
         tagged_fishes.save(tagged_fish_obj, function(err) {
             "use strict";

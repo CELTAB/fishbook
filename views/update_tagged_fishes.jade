@@ -31,7 +31,9 @@ block append scripts
                             weight : $('#taggedWeight').val(),
                             sex : $('#taggedSex').val(),
                             observation : $('#taggedObs').val(),
-                            institution_id : $('#taggedInstitution').val()
+                            institution_id : $('#taggedInstitution').val(),
+                            capture_date : $('#taggedCapDate').val(),
+                            release_date: $('#taggedRelDate').val()
 
           };
           $.post('/update_tagged_fishes', postData, function(result){
@@ -74,8 +76,14 @@ block append content
             label(for="taggedPIT") PIT Tag
             input(type="text" value="#{json.pit_tag}" disabled="true" class="form-control" id="taggedPIT" name="pit_tag")
 
+            label(for="taggedCapDate") Capture Date
+            input(type="date" value="#{json.capture_date}" disabled="true" class="form-control" id="taggedCapDate" name="capture_date")
+
             label(for="taggedCap") Capture Local
             input(type="text" value="#{json.capture_local}" disabled="true" class="form-control" id="taggedCap" name="capture_local")
+
+            label(for="taggedRelDate") Release Date
+            input(type="date" value="#{json.release_date}" disabled="true" class="form-control" id="taggedRelDate" name="release_date")
 
             label(for="taggedRel") Release Local
             input(type="text" value="#{json.release_local}" disabled="true" class="form-control" id="taggedRel" name="release_local")
