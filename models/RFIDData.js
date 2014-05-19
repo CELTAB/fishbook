@@ -61,16 +61,16 @@ function RFIDDataDAO(db) {
 
         if(sortBy){
             console.log(sortBy);
-        	if(sortOrder){	
-        		cursor.sort(sortBy, sortOrder);
+            if(sortOrder){  
+                cursor.sort(sortBy, sortOrder);
                 console.log(sortOrder);
             }
-        	else
-        		cursor.sort(sortBy, 1);
+            else
+                cursor.sort(sortBy, 1);
         }
 
         if(limit){
-        	cursor.limit(limit);
+            cursor.limit(limit);
             console.log(limit);
         }
         

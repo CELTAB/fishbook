@@ -691,23 +691,24 @@ function ContentHandler (db) {
 
         var query = new Object;
 
-        var collector_id = parseInt(req.body.collector_id);
+        var collector_id = req.body.collector_id;
+        var species_id = req.body.species_id;
+        var institution_id = req.body.institution_id;
         var tag = parseInt(req.body.tag);
         var sortBy = req.body.sortBy;
         var sortOrder = parseInt(req.body.sortOrder);
         var results_limit = parseInt(req.body.results_limit);
-        var species_id = parseInt(req.body.species_id);
-        var institution_id = parseInt(req.body.institution_id);
         var exportToCSV = req.body.exportToCSV;
 
-        if(collector_id)
-            query.idcollectorpoint = collector_id;
+
         if(tag)
             query.identificationcode = tag;
-        if(species_id)
-            query.idcollectorpoint = species_id;
-        if(institution_id)
-            query.idcollectorpoint = institution_id;
+        // if(collector_id)
+        //     query.xxxx = collector_id;
+        // if(species_id)
+        //     query.xxxx = species_id;
+        // if(institution_id)
+        //     query.xxxx = institution_id;
 
 
         collectors.getCollectorsIdNameHash(function(err, collectors_hash){
