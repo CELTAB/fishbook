@@ -117,17 +117,87 @@ function ContentHandler (db) {
 
     this.handleAddInstitutions = function(req, res, next) {
         "use strict";
-        var name = req.body.name;
 
         insertImage(req.files.imgSrc, function(imageName) {
             "use strict";
 
-            institutions.add(name, imageName, function(err) {
+            var location = req.body.location.split(',');
+
+            var institution = {
+                name: req.body.name,
+                image_name: imageName,
+                lat: location[0],
+                lng: location[1]
+            };
+
+            institutions.add(institution, function(err) {
                 if (err) return next(err);
 
                 return res.redirect("/institutions");
             }); 
         });        
+    }
+
+    this.displayUpdateInstitutions = function(req, res, next) {
+        "use strict";   
+        institutions.getInstitutionById(req.params.id,  function(err, institution_item){
+            if (err) throw err;
+            console.log(institution_item);
+            return res.render('update_institutions', {
+                    title: 'FishBook - Update Institutions',
+                    username: req.username,
+                    admin: req.admin,
+                    institution_item : JSON.stringify(institution_item)
+            });            
+        });
+        
+    }
+
+    this.handleUpdateInstitutions = function(req, res, next) {
+        "use strict";
+
+        // insertImage(req.files.image_name, function(imageName) {
+        // cant get image_name by the jquery post.
+        insertImage('', function(imageName) {
+
+            var location = req.body.location.split(',');
+
+            var institution = {
+                _id: req.body.institution_id,
+                name: req.body.name,
+                image_name: imageName,
+                lat: location[0],
+                lng: location[1]
+            };
+
+            // even if there is no logged in user, we can still post a comment
+            institutions.save(institution, function(err) {
+                "use strict";
+
+                if (err) return next(err);
+
+                return res.redirect("/institutions");
+            });
+        });
+
+        
+    }
+
+    this.handleRemoveInstitutions = function(req, res, next) {
+        "use strict";
+
+        var institution = {
+            _id: req.body.institution_id
+        };
+
+        // even if there is no logged in user, we can still post a comment
+        institutions.remove(institution, function(err) {
+            "use strict";
+
+            if (err) return next(err);
+
+            return res.redirect("/institutions");
+        });
     }
 
     /* SPECIES */
@@ -176,6 +246,64 @@ function ContentHandler (db) {
 
                 return res.redirect("/species");
             });
+        });
+    }
+
+    this.displayUpdateSpecies = function(req, res, next) {
+        "use strict";   
+        species.getSpecieById(req.params.id,  function(err, species_item){
+            if (err) throw err;
+
+            console.log(JSON.stringify(species_item));
+                            
+            return res.render('update_species', {
+                    title: 'FishBook - Update Species',
+                    username: req.username,
+                    admin: req.admin,
+                    species_item : JSON.stringify(species_item)
+            });            
+        });
+        
+    }
+
+    this.handleUpdateSpecies = function(req, res, next) {
+        "use strict";
+
+        // insertImage(req.files.image_name, function(imageName) {
+        // cant get image_name by the jquery post.
+        insertImage('', function(imageName) {
+            var speciesObj = {
+                _id: req.body.species_id,
+                name: req.body.name,
+                image_name: imageName
+            };
+
+            // even if there is no logged in user, we can still post a comment
+            species.save(speciesObj, function(err) {
+                "use strict";
+
+                if (err) return next(err);
+
+                return res.redirect("/species");
+            });
+        });
+
+        
+    }
+
+    this.handleRemoveSpecies = function(req, res, next) {
+        "use strict";
+
+        var species_obj = {
+            _id: req.body.species_id
+        };
+
+        species.remove(species_obj, function(err) {
+            "use strict";
+
+            if (err) return next(err);
+
+            return res.redirect("/species");
         });
     }
 
@@ -366,6 +494,70 @@ function ContentHandler (db) {
         tagged_fishes.add(  species_id, pit_tag, capture_local, release_local,
                             total_length, default_length, weight, sex, 
                             observation, institution_id, function(err) {
+            "use strict";
+
+            if (err) return next(err);
+
+            return res.redirect("/tagged_fishes");
+        });
+    }
+
+    this.displayUpdateTaggedFishes = function(req, res, next) {
+        "use strict";   
+        
+        species.getSpecies(function(err, species_list){
+            institutions.getInstitutions(function(err, institutions_list){
+                tagged_fishes.getTaggedFishesById(req.params.id,  function(err, tagged_fish){
+                    if (err) throw err;
+                                  
+                    return res.render('update_tagged_fishes', {
+                        title: 'FishBook - Update Tagged Fishes',
+                        username: req.username,
+                        admin: req.admin,
+                        tagged_fish : JSON.stringify(tagged_fish),
+                        species_list: JSON.stringify(species_list),
+                        institutions_list: JSON.stringify(institutions_list)
+                    });            
+                });
+            });   
+        });        
+    }
+
+    this.handleUpdateTaggedFishes = function(req, res, next) {
+        "use strict";
+
+        var tagged_fish_obj = {
+                            _id : req.body.tagged_fish_id,
+                            species_id : req.body.species_id,
+                            pit_tag : req.body.pit_tag,
+                            capture_local : req.body.capture_local,
+                            release_local : req.body.release_local,
+                            total_length : req.body.total_length,
+                            default_length : req.body.default_length,
+                            weight : req.body.weight,
+                            sex : req.body.sex,
+                            observation : req.body.observation,
+                            institution_id : req.body.institution_id
+        };
+
+        tagged_fishes.save(tagged_fish_obj, function(err) {
+            "use strict";
+
+            if (err) return next(err);
+
+            return res.redirect("/tagged_fishes");
+        });
+    }
+
+    this.handleRemoveTaggedFishes = function(req, res, next) {
+        "use strict";
+
+        var tagged_fish_obj = {
+            _id: req.body.tagged_fish_id
+        };
+
+        // even if there is no logged in user, we can still post a comment
+        tagged_fishes.remove(tagged_fish_obj, function(err) {
             "use strict";
 
             if (err) return next(err);

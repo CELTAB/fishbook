@@ -1,3 +1,5 @@
+var ObjectID = require('mongodb').ObjectID;
+
 function SpeciesDAO(db){
 	"use strict";
 
@@ -47,7 +49,7 @@ function SpeciesDAO(db){
     this.getSpecieById = function(id, callback){
         "use strict";
 
-        species.find({'_id':id}).sort('name',1).toArray(function(err, item){
+        species.findOne({'_id':ObjectID(id)},function(err, item){
             "use strict";
 
             if (err){ 
@@ -76,6 +78,39 @@ function SpeciesDAO(db){
             }
 
             callback(err, hash);
+        });
+    }
+
+    this.save = function (species_obj, callback) {
+        "use strict";        
+
+        var newObject = {'$set': {
+                                'name': species_obj.name
+        }};
+
+        if(species_obj.image_name)
+            newObject['$set'].image_name = species_obj.image_name;
+
+        species.update({'_id': ObjectID(species_obj._id) }, newObject, function (err, result) {
+            "use strict";
+
+            if (err) return callback(err);
+
+            console.log("Updated new species_obj");
+            callback(err);
+        });
+    }
+
+    this.remove = function (species_obj, callback) {
+        "use strict";        
+
+        species.remove({'_id': ObjectID(species_obj._id) }, function (err, result) {
+            "use strict";
+
+            if (err) return callback(err);
+
+            console.log("Removed new species_obj: " + ObjectID(species_obj._id));
+            callback(err);
         });
     }
 

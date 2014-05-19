@@ -1,3 +1,5 @@
+var ObjectID = require('mongodb').ObjectID;
+
 function TaggedFishesDAO(db) {
     "use strict";
 
@@ -89,7 +91,7 @@ function TaggedFishesDAO(db) {
 
     }
 
-        this.getTaggedFishesByPitTagHash = function(callback) {
+    this.getTaggedFishesByPitTagHash = function(callback) {
         "use strict";
 
         tagged_fishes.find().toArray(function(err, items) {
@@ -102,6 +104,61 @@ function TaggedFishesDAO(db) {
             callback(err, hash);
         });
 
+    }
+
+    this.getTaggedFishesById = function(id, callback){
+        "use strict";
+
+        tagged_fishes.findOne({'_id':ObjectID(id)},function(err, item){
+            "use strict";
+
+            if (err){ 
+                console.log("Error getTaggedFishesById, " + err);                
+                return callback(err, null)
+            };
+
+            callback(err, item);
+        });
+    }
+
+    this.save = function (tagged_fish_obj, callback) {
+        "use strict";        
+
+        var newObject = {'$set': {
+                            'species_id' : tagged_fish_obj.species_id,
+                            'pit_tag' : tagged_fish_obj.pit_tag,
+                            'capture_local' : tagged_fish_obj.capture_local,
+                            'release_local' : tagged_fish_obj.release_local,
+                            'total_length' : tagged_fish_obj.total_length,
+                            'default_length' : tagged_fish_obj.default_length,
+                            'weight' : tagged_fish_obj.weight,
+                            'sex' : tagged_fish_obj.sex,
+                            'observation' : tagged_fish_obj.observation,
+                            'institution_id' : tagged_fish_obj.institution_id
+
+        }};
+
+        tagged_fishes.update({'_id': ObjectID(tagged_fish_obj._id) }, newObject, function (err, result) {
+            "use strict";
+
+            if (err) return callback(err);
+
+            console.log("Updated new tagged_fish_obj");
+            callback(err);
+        });
+    }
+
+    this.remove = function (tagged_fish_obj, callback) {
+        "use strict";        
+
+        tagged_fishes.remove({'_id': ObjectID(tagged_fish_obj._id) }, function (err, result) {
+            "use strict";
+
+            if (err) return callback(err);
+
+            console.log("Removed new tagged_fish_obj: " + ObjectID(tagged_fish_obj._id));
+            callback(err);
+        });
     }
     
 }
