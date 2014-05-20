@@ -35,17 +35,27 @@ block append scripts
 
     function drawMarkers(){
       var bounds = new google.maps.LatLngBounds();  
-      for(var key in collectorsArray){
-        console.log("collector_id: " + collectorsArray[key]._id);
-        console.log("nome: " + collectorsArray[key].name);
-        console.log("status: " + collectorsArray[key].status);
-        console.log("location: (" + collectorsArray[key].lat + ", " + collectorsArray[key].lng + ")");
 
+      var collectorOnlineIcon = {
+        url: 'img/markers/collector_online.png'
+      };
+
+      var collectorOfflineIcon = {
+        url: 'img/markers/collector_offline.png'
+      };
+
+      var collectorRFIDEventIcon = {
+        url: 'img/markers/rfid_event.png'
+      };
+
+      for(var key in collectorsArray){
         var latLng = new google.maps.LatLng(collectorsArray[key].lat, collectorsArray[key].lng );
 
         var marker = new google.maps.Marker({
           map: map,
-            draggable: false 
+          draggable: false,
+          icon: collectorOfflineIcon,
+          title: collectorsArray[key].name
         });
 
         marker.setPosition(latLng);
