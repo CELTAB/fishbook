@@ -194,7 +194,7 @@ module.exports = function(SocketIO, db){
 
 											jade.renderFile('./views/fishrow.jade', {rfiddata: rfid}, function (err, html) {
 											  if (!err) 
-												serverEmitter.emit('rfiddata', { htmlRow: html} );	
+												serverEmitter.emit('rfiddata', { htmlRow: html, mac: collectorMac} );	
 											  else throw err
 											});
 							            });	
