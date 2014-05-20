@@ -91,13 +91,36 @@ block append scripts
         this.onlineMarker.setVisible(false);
         this.offlineMarker.setVisible(false);
         this.readEventMarker.setVisible(true);   
-        var _this = this;     
-        setTimeout(function(){
-          _this.readEventMarker.setVisible(false);
+        this.animate(4, 600);
+        //- var _this = this;     
+        //- setTimeout(function(){
+        //-   _this.readEventMarker.setVisible(false);
+        //-   _this.isBussy = false;
+        //-   _this.updateStatus();
+        //- }, 3000);
+      };
+
+      this.animate = function(recursion, time){
+        var _this = this;
+        if(time > 0 ){
+          _this.readEventMarker.setVisible(false);        
           _this.isBussy = false;
           _this.updateStatus();
-        }, 3000);
-      };
+        }else{
+          // temporary only to make the animation with offline
+          if(recursion % 2){
+            _this.readEventMarker.setVisible(false);
+            this.offlineMarker.setVisible(true);
+          }else{          
+            _this.readEventMarker.setVisible(true);
+            this.offlineMarker.setVisible(false);
+          }
+
+          setTimeout(function(){
+            _this.animate(recursion-1, time);
+          });      
+        }
+      }
 
       this.getMarkers = function(){
         return {online: this.onlineMarker, offline: this.offlineMarker, readEvent: this.readEventMarker};
