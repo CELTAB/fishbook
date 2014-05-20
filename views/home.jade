@@ -13,8 +13,7 @@ block append scripts
   script().  
     var collectorsArray =  JSON.parse( !{JSON.stringify(collectors)} );
 
-    var markers=[];
-    var collectorsHash = {};
+    var collectors = [];
     
     var map;    
 
@@ -35,86 +34,97 @@ block append scripts
 
     google.maps.event.addDomListener(window, 'load', initialize);
 
-    function drawMarkers(){
+
+    var MapMarker = function(title, markerIcon){
+      return new google.maps.Marker({
+          map: map,
+          draggable: false,
+          icon: markerIcon,
+          title: title
+      });
+    };
+
+    var Collector = function(id, collectorName, mac, status, latLng){
+      this.id = id;
+      this.name = collectorName;
+      this.mac = mac;
+      this.latLng = latLng;
+      
+      // Create the markers for  the collector point
+      this.onlineMarker = new MapMarker(collectorName, 'img/markers/collector_online.png');
+      this.onlineMarker.setPosition(this.latLng);
+      this.offlineMarker = new MapMarker(collectorName, 'img/markers/collector_offline.png');
+      this.offlineMarker.setPosition(this.latLng);
+      this.readEventMarker = new MapMarker(collectorName, 'img/markers/rfid_event.png');
+      this.readEventMarker.setPosition(this.latLng);
+
+      // change visibility of the markers
+      this.onlineMarker.setVisible(status == 'Online');
+      this.offlineMarker.setVisible(!(status == 'Online'));
+      this.readEventMarker.setVisible(false);
+
+      this.status = status;      
+
+      this.setStatus = function(newStatus) {
+        this.status = newStatus;
+        this.updateStatus();
+      }
+
+      this.updateStatus = function() {
+        if(!this.isBussy){
+          console.log(this.name + ' is now ' + this.status);
+          if(this.status == 'Online'){
+            console.log('update makers to online');
+            this.onlineMarker.setVisible(true);
+            this.offlineMarker.setVisible(false);
+          }else{
+            console.log('update makers to offline');
+            console.log('marker online: '+  this.getMarkers());
+            this.onlineMarker.setVisible(false);
+            this.offlineMarker.setVisible(true);
+          }
+        }
+      };
+
+      this.startReadEvent = function(){        
+        this.isBussy = true;
+        this.onlineMarker.setVisible(false);
+        this.offlineMarker.setVisible(false);
+        this.readEventMarker.setVisible(true);   
+        var _this = this;     
+        setTimeout(function(){
+          _this.readEventMarker.setVisible(false);
+          _this.isBussy = false;
+          _this.updateStatus();
+        }, 3000);
+      };
+
+      this.getMarkers = function(){
+        return {online: this.onlineMarker, offline: this.offlineMarker, readEvent: this.readEventMarker};
+      };
+
+      this.isBussy = false;
+    };
+
+    function drawMarkers() {
       var bounds = new google.maps.LatLngBounds();  
 
-      var collectorOnlineIcon = {
-        url: 'img/markers/collector_online.png'
-      };
-
-      var collectorOfflineIcon = {
-        url: 'img/markers/collector_offline.png'
-      };
-
-      var collectorRFIDEventIcon = {
-        url: 'img/markers/rfid_event.png'
-      };
-
-      for(var key in collectorsArray){
+      for(var key in collectorsArray) {
+        var id = collectorsArray[key]._id;
+        var title = collectorsArray[key].name;
+        var mac = collectorsArray[key].mac;
+        var status = collectorsArray[key].status;
         var latLng = new google.maps.LatLng(collectorsArray[key].lat, collectorsArray[key].lng );
 
-        var onlineMarker = new google.maps.Marker({
-          map: map,
-          draggable: false,
-          icon: collectorOnlineIcon,
-          title: collectorsArray[key].name
-        });
+        var collector = new Collector(id, title, mac, status, latLng);
+        collector.updateStatus();
 
-        var offlineMarker = new google.maps.Marker({
-          map: map,
-          draggable: false,
-          icon: collectorOfflineIcon,
-          title: collectorsArray[key].name
-        });
+        collectors.push(collector);
 
-        var readEventMarker = new google.maps.Marker({
-          map: map,
-          draggable: false,
-          icon: collectorRFIDEventIcon,
-          title: collectorsArray[key].name
-        });
-
-        onlineMarker.setPosition(latLng);
-        offlineMarker.setPosition(latLng);
-        readEventMarker.setPosition(latLng);
-
-        if(collectorsArray[key].status == 'Online'){
-          onlineMarker.setVisible(true);
-          offlineMarker.setVisible(false);
-        }else{
-          onlineMarker.setVisible(false);
-          offlineMarker.setVisible(true);        
-        }
-
-        readEventMarker.setVisible(false);
-
-        var collector = {name: collectorsArray[key].name, 
-                         mac: collectorsArray[key].mac, 
-                         latLong: latLng,
-                         markers: { online: onlineMarker,
-                                    offline: offlineMarker,
-                                    readEventMarker: readEventMarker},
-                         updateCollectorStatus: function(newStatus) {
-                            console.log(this.name + ' is now ' + newStatus);
-                            if(newStatus == 'Online'){
-                              console.log('update makers to online');
-                              this.markers.offline.setVisible(false);
-                              this.markers.online.setVisible(true);
-                            }else{
-                              console.log('update makers to offline');
-                              this.markers.online.setVisible(false);
-                              this.markers.offline.setVisible(true);
-                            }
-                         },
-                         isBussy: false };
-        //- console.log(collector);
-
-        collectorsHash[collectorsArray[key]._id] = collector;
-
-        bounds.extend( collector.markers.online.getPosition() );      
-        markers.push(collector.markers.online);
-       
+        console.log('marker online: '+  collector.getMarkers());
+        bounds.extend( collector.getMarkers().online.getPosition() );        
       }
+
       map.fitBounds( bounds );
     }
 
@@ -125,9 +135,9 @@ block append scripts
     });
 
     socket.on('collectors_status', function (data) {      
-      for(var key in collectorsHash){
-        if(collectorsHash[key].mac == data.mac){            
-          collectorsHash[key].updateCollectorStatus(data.status);
+      for(var key in collectors){
+        if(collectors[key].mac == data.mac){            
+          collectors[key].setStatus(data.status);
           break;
         }
       }
@@ -135,6 +145,12 @@ block append scripts
 
     socket.on('rfiddata', function (data) {
       console.log(data);
+      for(var key in collectors){
+        if(collectors[key].mac == data.mac){            
+          collectors[key].startReadEvent();
+          break;
+        }
+      }
       console.log('Update RFID marker: ' + data.htmlRow.mac);
     });
 
