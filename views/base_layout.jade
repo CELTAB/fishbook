@@ -61,8 +61,13 @@ block content
                   a(href="logout") Logout                
   else
     div(class="container")
+      div(class="navbar navbar-default navbar-fixed-top" role="navigation")
+        div(class="row")
+          div(class="col-md-1")
+          div(class="navbar-header")
+            a(class="navbar-brand" href="/") FishBook
       form(class="form-signin" role="form" method="post" action="/login")
-        h2(class="form-signin-heading") Please sign in
+        h4(class="form-signin-heading") Please sign in
         if login_error
           div(class="alert alert-warning fade in")
             button(type="button" class="close" data-dismiss="alert" aria-hidden="true") × 
@@ -70,5 +75,5 @@ block content
                 = login_error
         input(type="text" class="form-control" id="username" name="username" placeholder="Email address" required autofocus)
         input(type="password" class="form-control" id="password" name="password" placeholder="Password" required)        
-        button(class="btn btn-lg btn-primary btn-block" type="submit") Sign in
+        button(class="btn btn-primary btn-block" type="submit") Sign in
 
