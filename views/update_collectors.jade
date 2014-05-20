@@ -29,7 +29,11 @@ block append scripts
           $('button[name="delete"]').prop('disabled', true);
           $('button[name="update"]').text("Save");
           $('.form-control').prop('disabled', false);
+
+          marker.draggable = true;
+
         }else{
+
           $('button[name="delete"]').prop('disabled', false);
           $('button[name="update"]').text("Update");
           $('.form-control').prop('disabled', true);
@@ -44,7 +48,7 @@ block append scripts
           };
           $.post('/update_collectors', postData, function(result){
             window.location.replace('/collectors');
-          });
+          });          
         }
       }
 
@@ -85,7 +89,7 @@ block append scripts
       function create_marker(latLng){
         marker = new google.maps.Marker({
           map: map,
-            draggable: true 
+          draggable: true 
         });
 
         marker.setPosition(latLng);
