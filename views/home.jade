@@ -57,11 +57,14 @@ block append scripts
       this.offlineMarker.setPosition(this.latLng);
       this.readEventMarker = new Marker(collectorName, 'img/markers/rfid_event.png');
       this.readEventMarker.setPosition(this.latLng);
+      this.readEventMarkerYellow = new Marker(collectorName, 'img/markers/rfid_event_yellow.png');
+      this.readEventMarkerYellow.setPosition(this.latLng);      
 
       // change visibility of the markers
       this.onlineMarker.setVisible(status == 'Online');
       this.offlineMarker.setVisible(!(status == 'Online'));
       this.readEventMarker.setVisible(false);
+      this.readEventMarkerYellow.setVisible(false);
 
       this.status = status;      
 
@@ -83,11 +86,13 @@ block append scripts
       };
 
       this.startReadEvent = function(){        
-        this.isBussy = true;
-        this.onlineMarker.setVisible(false);
-        this.offlineMarker.setVisible(false);
-        this.readEventMarker.setVisible(true);   
-        this.animate(6, 800);
+        if(!this.isBussy) {
+          this.isBussy = true;
+          this.onlineMarker.setVisible(false);
+          this.offlineMarker.setVisible(false);
+          this.readEventMarker.setVisible(true);   
+          this.animate(6, 800);
+        }
       };
 
       this.animate = function(recursion, time){
@@ -96,17 +101,18 @@ block append scripts
           // temporary only to make the animation with offline
           if(recursion % 2){
             _this.readEventMarker.setVisible(false);
-            this.offlineMarker.setVisible(true);
+            _this.readEventMarkerYellow.setVisible(true);
           }else{          
             _this.readEventMarker.setVisible(true);
-            this.offlineMarker.setVisible(false);
+            _this.readEventMarkerYellow.setVisible(false);
           }
 
           setTimeout(function(){
             _this.animate(recursion-1, time);
           }, time);      
         }else{
-          _this.readEventMarker.setVisible(false);        
+          _this.readEventMarker.setVisible(false);      
+          _this.readEventMarkerYellow.setVisible(false);      
           _this.isBussy = false;
           _this.updateStatus();          
         }

@@ -744,26 +744,41 @@ function ContentHandler (db) {
                         rfidadata.findRFIDData(query, sortBy, sortOrder, results_limit, function(err,result){
                              if(err) return next(err);
      
+
+                             var filteredElements = [];
                              for(var key in result){
 
-                                console.log('key' + key);
+                                console.log('key: ' + key);
                                 
                                 var institution_id = collectors_hash[result[key].macaddress].institution_id;
                                 if(post_obj.institution_id && post_obj.institution_id != institution_id){
                                     //if an institution was specified on search parameters,
                                     //and if it is different of the actual result key, so it is
                                     //not valid.
-                                    result.splice(key, 1);
+                                    //result.splice(key, 1);
+                                    continue;
+                                }
+                                console.log('identificationcode: ' + JSON.stringify(result[key].identificationcode));
+                                console.log('AQUI: ' + JSON.stringify(tagged_fish_hash));
+                                console.log('IDENT: ' + JSON.stringify(tagged_fish_hash[result[key].identificationcode]));
+
+                                //TODO: pit tags that are not registered in the system causes crash, need to be implemented a work around this behaviour
+                                if(tagged_fish_hash[result[key].identificationcode] == null){
+                                    //result.splice(key, 1);
                                     continue;
                                 }
 
                                 var species_id = tagged_fish_hash[result[key].identificationcode].species_id;
-                                if(post_obj.species_id && post_obj.species_id != species_id){
+                                if(((post_obj.species_id != "")) && (post_obj.species_id != species_id)){
+                                    console.log('filtro especie: '+ result[key].identificationcode + ', ' + post_obj.species_id +', ' + species_id);
                                     //if a species was specified on search parameters,
                                     //and if it is different of the actual result key, so it is
                                     //not valid.
-                                    result.splice(key, 1);
+                                    console.log('length before: ' + result.length);
+                                    //result.splice(key, 1);
+                                    console.log('length after: ' + result.length);
                                     continue;
+                                    console.log('oi depois do continue 1');
                                 }
 
                                 // If institution_id is null, the Institution is unknown
@@ -776,15 +791,16 @@ function ContentHandler (db) {
                                 result[key].species_name = species_hash[species_id];
                                 result[key].collector_name = collectors_hash[result[key].macaddress].name;
                                 console.log('rfiddata: ' + JSON.stringify(result[key]));
+                                filteredElements.push(result[key]);
                              }
                             
-                            if(result.length > 0 ){
+                            if(filteredElements.length > 0 ){
                             
                                 if(exportToCSV){
                                 
                                          json2csv(
                                              {
-                                                 data: result, 
+                                                 data: filteredElements, 
                                                  fields: ['idcollectorpoint', 
                                                      'idantena', 
                                                      'identificationcode',
@@ -810,7 +826,7 @@ function ContentHandler (db) {
                                                  username: req.username,
                                                  admin: req.admin,                
                                                  result_status: '',
-                                                 result_list: JSON.stringify(result),
+                                                 result_list: JSON.stringify(filteredElements),
                                                  species_list: JSON.stringify(species_list),
                                                  institutions_list: JSON.stringify(institutions_list),
                                                  collectors_list: JSON.stringify(collectors_list),
