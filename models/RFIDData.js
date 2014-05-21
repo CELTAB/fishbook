@@ -38,6 +38,37 @@ function RFIDDataDAO(db) {
 		}
 	};
 
+    this.insertImportedData = function(summaryArray, callback){
+
+        for(var summary in summaryArray){
+
+            var rfidArray = summaryArray[summary].datasummary.data;
+
+            for(var key in rfidArray){
+                var rfid = rfidArray[key];
+            
+                var rfidData = {
+                    idcollectorpoint: rfid.idcollectorpoint,
+                    idantena: rfid.idantena,
+                    identificationcode: rfid.identificationcode,
+                    applicationcode: rfid.applicationcode,
+                    datetime: rfid.datetime,
+                    md5hash: summaryArray[summary].datasummary.md5diggest
+                };
+
+                RFIDData.insert(rfidData, function(err){
+                    if(err){
+                        callback(false);
+                        return console.log(err);
+                    }
+                    callback(true);
+                    return console.log('Insert successful');
+                });
+            }
+        }
+
+    }
+
     this.getRFIDData = function(num, callback) {
         "use strict";      
 
