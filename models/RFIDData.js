@@ -22,7 +22,7 @@ function RFIDDataDAO(db) {
 	            idantena: rfid.idantena,
 	            identificationcode: rfid.identificationcode,
 				applicationcode: rfid.applicationcode,
-	            datetime: Date(rfid.datetime),
+	            datetime: new Date(rfid.datetime),
 	            md5hash: data.datasummary.md5diggest,
                 macaddress: data.macaddress
 			};
@@ -52,7 +52,7 @@ function RFIDDataDAO(db) {
                     idantena: rfid.idantena,
                     identificationcode: rfid.identificationcode,
                     applicationcode: rfid.applicationcode,
-                    datetime: rfid.datetime,
+                    datetime: new Date(rfid.datetime),
                     md5hash: summaryArray[summary].datasummary.md5diggest
                 };
 
