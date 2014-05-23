@@ -747,24 +747,17 @@ function ContentHandler (db) {
 
                              var filteredElements = [];
                              for(var key in result){
-
-                                console.log('key: ' + key);
                                 
                                 var institution_id = collectors_hash[result[key].macaddress].institution_id;
                                 if(post_obj.institution_id && post_obj.institution_id != institution_id){
                                     //if an institution was specified on search parameters,
                                     //and if it is different of the actual result key, so it is
                                     //not valid.
-                                    //result.splice(key, 1);
                                     continue;
                                 }
-                                console.log('identificationcode: ' + JSON.stringify(result[key].identificationcode));
-                                console.log('AQUI: ' + JSON.stringify(tagged_fish_hash));
-                                console.log('IDENT: ' + JSON.stringify(tagged_fish_hash[result[key].identificationcode]));
 
                                 //TODO: pit tags that are not registered in the system causes crash, need to be implemented a work around this behaviour
                                 if(tagged_fish_hash[result[key].identificationcode] == null){
-                                    //result.splice(key, 1);
                                     continue;
                                 }
 
@@ -774,11 +767,7 @@ function ContentHandler (db) {
                                     //if a species was specified on search parameters,
                                     //and if it is different of the actual result key, so it is
                                     //not valid.
-                                    console.log('length before: ' + result.length);
-                                    //result.splice(key, 1);
-                                    console.log('length after: ' + result.length);
                                     continue;
-                                    console.log('oi depois do continue 1');
                                 }
 
                                 // If institution_id is null, the Institution is unknown
@@ -790,7 +779,6 @@ function ContentHandler (db) {
 
                                 result[key].species_name = species_hash[species_id];
                                 result[key].collector_name = collectors_hash[result[key].macaddress].name;
-                                console.log('rfiddata: ' + JSON.stringify(result[key]));
                                 filteredElements.push(result[key]);
                              }
                             
@@ -879,11 +867,62 @@ function ContentHandler (db) {
     this.handleImport = function(req, res, next) {
         "use strict";   
 
-        console.log(req.files.import_file);
+        var file = req.files.import_file.path;
+         
+        fs.readFile(file, 'utf8', function (err, data) {
 
+            if (err) throw err;
 
+            fs.unlink(file, function (err) {
+                if (err) throw err;
+                console.log('successfully deleted ' + file);
+            });
 
-        res.redirect("/import");
+            if (err) {
+
+                return res.render('import', {
+                    title: 'FishBook - Import data',
+                    username: req.username,
+                    admin: req.admin,                
+                    import_error: 'Failed to import the file. Error: ' + err,
+                    import_success: ''
+                }); 
+                
+            }else{
+                try {
+                    var parsed_data = JSON.parse(data);
+
+                    var insert_number = parsed_data.length;
+
+                    var counter = 0;
+                    rfidadata.insertImportedData(parsed_data, function(success){
+                        counter++;
+
+                        if(!success)
+                            throw new Error("Problem inserting data on db.")
+                        else if(counter == insert_number){
+                            return res.render('import', {
+                                title: 'FishBook - Import data',
+                                username: req.username,
+                                admin: req.admin,                
+                                import_error: '',
+                                import_success: 'Data successfully imported.'
+                            });
+                        }
+                    });
+                } catch (e) {
+                    return res.render('import', {
+                        title: 'FishBook - Import data',
+                        username: req.username,
+                        admin: req.admin,                
+                        import_error: 'Failed to import the file. Error: ' + e,
+                        import_success: ''
+                    }); 
+                }
+            
+            }
+
+        });    
     }
 
 
