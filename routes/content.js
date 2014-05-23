@@ -557,7 +557,7 @@ function ContentHandler (db) {
         var tagged_fish_obj = {
                             _id : req.body.tagged_fish_id,
                             species_id : req.body.species_id,
-                            pit_tag : req.body.pit_tag,
+                            pit_tag : parseInt(req.body.pit_tag),
                             capture_local : req.body.capture_local,
                             release_local : req.body.release_local,
                             total_length : req.body.total_length,

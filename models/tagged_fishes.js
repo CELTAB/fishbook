@@ -62,11 +62,13 @@ function TaggedFishesDAO(db) {
 
         tagged_fishes.findOne({'pit_tag': parseInt(pit_tag)}, function(err, item) {
 
+            console.log('Searching for pit_tag: ' + pit_tag);
+
             var hash = {};
             if(item){ 
-           // console.log('Find One: ' + pit_tag + ' - ' + JSON.stringify(item));
+            console.log('Find One: ' + pit_tag + ' - ' + JSON.stringify(item));
 
-//            console.log("PIT_TAG: " + JSON.stringify(item));
+            console.log("PIT_TAG: " + JSON.stringify(item));
 
             hash[item.pit_tag] = {'species_id': item.species_id, 'institution_id': item.institution_id};
 

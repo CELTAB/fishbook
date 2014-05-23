@@ -3,7 +3,7 @@ extends base_layout
 block scripts
     script(src='/socket.io/socket.io.js')
     script(type='text/javascript').
-        var socket = io.connect('http://179.106.217.28:8082/');
+        var socket = io.connect('http://localhost:8082');
 
         socket.on('connect', function(data){
             console.log("Connected to Node.js Server");            
