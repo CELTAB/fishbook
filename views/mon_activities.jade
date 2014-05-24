@@ -9,6 +9,7 @@ block scripts
         
         $("#tableBody tr").click(function() {
           console.log('this.name: ' + $(this).attr('name'));
+
           window.location = "/update_tagged_fishes_pittag/"+$(this).attr('name');
         });
       });
@@ -21,13 +22,17 @@ block scripts
         });
 
         socket.on('rfiddata', function (data) {
-            $('#tableBody tr:last').remove();
+            var rowCount = $('#myTable tr').length;
+            if(rowCount == 20){
+                $('#tableBody tr:last').remove();
+            }
             $('#tableBody').prepend(data.htmlRow);
 
             $('#tableBody tr:nth-child(1)').click(function() {
               console.log('this.name: ' + $(this).attr('name'));
               window.location = "/update_tagged_fishes_pittag/"+$(this).attr('name');
             });
+            $('#tableBody tr:nth-child(1)').css('cursor', 'pointer');
 
             if($('#tableBody tr:nth-child(2)').attr("class") == "success"){                   
                 
