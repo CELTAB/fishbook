@@ -33,6 +33,7 @@ module.exports = exports = function(app, db) {
     app.get('/update_institutions/:id', contentHandler.displayUpdateInstitutions);
     app.get('/update_species/:id', contentHandler.displayUpdateSpecies);
     app.get('/update_tagged_fishes/:id', contentHandler.displayUpdateTaggedFishes);
+    app.get('/update_tagged_fishes_pittag/:pittag', contentHandler.displayUpdateTaggedFishesPitTag);
 
     // Entries POST
     app.post('/add_institutions', contentHandler.handleAddInstitutions);

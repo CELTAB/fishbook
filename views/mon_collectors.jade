@@ -14,6 +14,17 @@ block scripts
             var name = 'status_'+ data.mac;
             var filter = 'td[name="' +name+ '"]';
             $(filter).text(data.status);
+
+            // row color
+            var rowName = 'row_' + data.mac;
+            var rowFilter = 'tr[name="' +rowName+ '"]';
+            if(data.status == 'Online'){ 
+                $(rowFilter).removeClass('danger');
+                $(rowFilter).addClass('success');
+            }else{
+                $(rowFilter).removeClass('success');
+                $(rowFilter).addClass('danger');
+            }
         });
 
         socket.on('info', function (data) {
@@ -35,11 +46,15 @@ block append content
           tbody(id="tableBody")
           -var jsonArray = JSON.parse(collectors)
           for data in jsonArray
-            tr 
-              td= data.institution_name
-              td= data.name
-              td= data.mac
-              td= data.description
-              td(name="status_#{data.mac}")= data.status
+            if data.status == 'Online'
+              tr(name="row_#{data.mac}" class="success")
+            else
+              tr(name="row_#{data.mac}" class="danger")
+              
+                td= data.institution_name
+                td= data.name
+                td= data.mac
+                td= data.description
+                td(name="status_#{data.mac}")= data.status
 
                        

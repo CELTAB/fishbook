@@ -551,6 +551,29 @@ function ContentHandler (db) {
         });        
     }
 
+    this.displayUpdateTaggedFishesPitTag = function(req, res, next) {
+        "use strict";   
+        
+        species.getSpecies(function(err, species_list){
+            institutions.getInstitutions(function(err, institutions_list){
+                tagged_fishes.getTaggedFishesByPitTag(req.params.pittag,  function(err, tagged_fish){
+                    if (err) throw err;
+
+                    //tagged_fish.release_date = tagged_fish.release_date.toISOString().substr(0,10);
+                                  
+                    return res.render('update_tagged_fishes', {
+                        title: 'FishBook - Update Tagged Fishes',
+                        username: req.username,
+                        admin: req.admin,
+                        tagged_fish : JSON.stringify(tagged_fish),
+                        species_list: JSON.stringify(species_list),
+                        institutions_list: JSON.stringify(institutions_list)
+                    });            
+                });
+            });   
+        });        
+    }
+
     this.handleUpdateTaggedFishes = function(req, res, next) {
         "use strict";
 

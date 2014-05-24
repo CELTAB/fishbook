@@ -108,6 +108,26 @@ function TaggedFishesDAO(db) {
         });
     }
 
+    this.getTaggedFishesByPitTag = function(pit_tag, callback){
+        "use strict";
+
+        tagged_fishes.findOne({'pit_tag': parseInt(pit_tag)}, function(err, item) {
+
+            console.log('Searching for pit_tag: ' + pit_tag);
+
+            var hash = {};
+            if(item){ 
+            console.log('Find One: ' + pit_tag + ' - ' + JSON.stringify(item));
+
+            console.log("PIT_TAG: " + JSON.stringify(item));
+
+            hash[item.pit_tag] = {'species_id': item.species_id, 'institution_id': item.institution_id};
+
+            }
+            callback(err, item);
+        });
+    }
+
     this.save = function (tagged_fish_obj, callback) {
         "use strict";     
 

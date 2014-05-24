@@ -2,7 +2,17 @@ extends base_layout
 
 block scripts
     script(src='/socket.io/socket.io.js')
+    script(src='/js/jquery.min.js')
     script(type='text/javascript').
+      $(document).ready(function(){
+        $("#tableBody tr").css('cursor', 'pointer');
+        
+        $("#tableBody tr").click(function() {
+          console.log('this.name: ' + $(this).attr('name'));
+          window.location = "/update_tagged_fishes_pittag/"+$(this).attr('name');
+        });
+      });
+
         var socket = io.connect('http://localhost:8082');
 
         socket.on('connect', function(data){
@@ -13,7 +23,12 @@ block scripts
         socket.on('rfiddata', function (data) {
             $('#tableBody tr:last').remove();
             $('#tableBody').prepend(data.htmlRow);
-            
+
+            $('#tableBody tr:nth-child(1)').click(function() {
+              console.log('this.name: ' + $(this).attr('name'));
+              window.location = "/update_tagged_fishes_pittag/"+$(this).attr('name');
+            });
+
             if($('#tableBody tr:nth-child(2)').attr("class") == "success"){                   
                 
             }else{
@@ -48,7 +63,7 @@ block append content
                 for rfiddata in jsonArray
                     if odd == 0
                         -odd = 1
-                        tr(class="success") 
+                        tr(name="#{rfiddata.identificationcode}" class="success") 
                             td= rfiddata.institution_name
                             td= rfiddata.collector_name
                             td= rfiddata.species_name
@@ -57,7 +72,7 @@ block append content
                             td= (new Date(rfiddata.datetime)).toISOString().replace(/T/, ' ').replace(/\..+/, '')
                     else
                         -odd = 0
-                        tr
+                        tr(name="#{rfiddata.identificationcode}")
                             td= rfiddata.institution_name
                             td= rfiddata.collector_name
                             td= rfiddata.species_name

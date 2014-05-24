@@ -81,7 +81,7 @@ function CollectorsDAO(db) {
                 return callback(err, null)
             };
 
-            //console.log("Found " + items.length + " collectors");            
+            console.log("Found " + items.length + " collectors");            
             callback(err, items);
         });
     }

@@ -1,1 +1,0 @@
-{ "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "rfidmonitor.rfiddatas", "name" : "_id_" } ] }
