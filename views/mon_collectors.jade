@@ -48,13 +48,19 @@ block append content
           for data in jsonArray
             if data.status == 'Online'
               tr(name="row_#{data.mac}" class="success")
-            else
-              tr(name="row_#{data.mac}" class="danger")
-              
                 td= data.institution_name
                 td= data.name
                 td= data.mac
                 td= data.description
                 td(name="status_#{data.mac}")= data.status
+            else
+              tr(name="row_#{data.mac}" class="danger")
+                td= data.institution_name
+                td= data.name
+                td= data.mac
+                td= data.description
+                td(name="status_#{data.mac}")= data.status
+              
+
 
                        

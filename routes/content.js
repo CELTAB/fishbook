@@ -22,6 +22,16 @@ function ContentHandler (db) {
     var users = new UsersDAO(db);
     var images = new ImagesDAO(db);
 
+    var resolve_pit_tag = function(applicationCode, identificationCode){
+        var pit_tag = '';
+        if(parseInt(applicationCode)> 0){
+            pit_tag += applicationCode;
+        }
+        if(parseInt(identificationCode) > 0){
+            pit_tag += identificationCode;
+        }
+    }
+
     var insertImage = function(imgFile, callback){
         console.log("aqui");
         if(imgFile.name){
@@ -961,21 +971,34 @@ function ContentHandler (db) {
                             if(err) return next(err);                        
 
                             for(var key in result) {
-                                // Institution ID from the collector that captured the PIT_TAG
-                                var institution_id = collectors_hash[result[key].macaddress].institution_id;
-                                var species_id = tagged_fish_hash[result[key].identificationcode].species_id;
-                                console.log('collectors_hash: '+JSON.stringify(collectors_hash));
-                                console.log('institutions_hash: '+JSON.stringify(institutions_hash));
 
-                                // If institution_id is null, the Institution is unknown
-                                if(institution_id){
-                                    result[key].institution_name = institutions_hash[institution_id];
-                                }else{
-                                    result[key].institution_name = 'Unknown';
+                                try{                                
+                                    // Institution ID from the collector that captured the PIT_TAG
+                                    var institution_id = collectors_hash[result[key].macaddress].institution_id;
+                                    var species_id = tagged_fish_hash[result[key].identificationcode].species_id;
+                                    console.log('collectors_hash: '+JSON.stringify(collectors_hash));
+                                    console.log('institutions_hash: '+JSON.stringify(institutions_hash));
+
+                                    // If institution_id is null, the Institution is unknown
+                                    if(institution_id){
+                                        result[key].institution_name = institutions_hash[institution_id];
+                                    }else{
+                                        result[key].institution_name = 'Unknown';
+                                    }
+                                    result[key].species_name = species_hash[species_id];
+                                    result[key].collector_name = collectors_hash[result[key].macaddress].name;
+                                }catch(e) {
+                                    console.log("Error: " + JSON.stringify(result[key].identificationcode) + " not found.");
+
+                                    // If institution_id is null, the Institution is unknown
+                                    if(institution_id){
+                                        result[key].institution_name = 'Unknown';
+                                    }else{
+                                        result[key].institution_name = 'Unknown';
+                                    }
+                                    result[key].species_name = 'Unknown';
+                                    result[key].collector_name = 'Unknown';
                                 }
-                                result[key].species_name = species_hash[species_id];
-                                result[key].collector_name = collectors_hash[result[key].macaddress].name;
-                                console.log('rfiddata: ' + JSON.stringify(result[key]));
                             }
 
                             return res.render('mon_activities', {
@@ -1001,6 +1024,7 @@ function ContentHandler (db) {
                 if(err) return next(err);
                 
                 for(var key in result){
+                    console.log('Collector: ' + JSON.stringify(result[key]));
                     result[key].institution_name = institutions_hash[result[key].institution_id];
                 }
 

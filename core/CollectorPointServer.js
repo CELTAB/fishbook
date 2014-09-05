@@ -154,7 +154,11 @@ module.exports = function(SocketIO, db){
 										datetime: (new Date).toISOString()
 									   };
 						console.log("Sending ACK-DATA: " + JSON.stringify(ack_data));
-						socket.write(buildMessage(JSON.stringify(ack_data)));
+						try{
+							socket.write(buildMessage(JSON.stringify(ack_data)));
+						}catch(e){
+							
+						}
 
 
 				        collectors.getCollectorsMacNameHash(function(err, collectors_hash){
