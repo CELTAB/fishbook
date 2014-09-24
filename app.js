@@ -35,7 +35,7 @@ var express = require('express')
 // Socket.io
 var http = require('http');
 var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server, {log: false});
 
 MongoClient.connect('mongodb://localhost:27017/rfidmonitor', function(err, db) {
     "use strict";
@@ -60,10 +60,7 @@ MongoClient.connect('mongodb://localhost:27017/rfidmonitor', function(err, db) {
     if ('development' == app.get('env')) {
       app.use(express.logger('dev'));
       app.locals.pretty = true;
-      
-      io.configure('development', function () {
-        io.disable('log');
-      });
+
     }
 
     // Application routes
