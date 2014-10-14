@@ -173,7 +173,7 @@ block append scripts
       map.fitBounds( bounds );
     }
 
-    var socket = io.connect('http://localhost:8082');
+    var socket = io.connect('http://10.42.0.65:8082');
 
     socket.on('connect', function(data){
         console.log("Connected to Node.js Server");            
