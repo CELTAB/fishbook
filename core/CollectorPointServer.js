@@ -56,9 +56,69 @@ module.exports = function(SocketIO, db){
 		return newMessage;
 	}
 
+	// var socketList = {};
+
+	var SocketController = function() {
+		this.socketList = {};
+
+		this.socketTimeout = function() {			
+			var syn_alive = JSON.stringify({ type:"SYN-ALIVE", data: {}, datetime: (new Date()).toISOString() });
+			var message = buildMessage(syn_alive);
+	        for(var key in this.socketList){
+	        	// console.log("Collector address: " +this.socketList[key].address );
+	        	var socketInfo = this.socketList[key];
+
+	        	if(socketInfo.status == 'unknown'){
+	        		// if the server sent a message and the collector did not answer
+	        		// the server must close the connection
+	    			// console.log("Timeout: collector inactive for too much time, closing connection with: " + socketInfo.address);
+	        		
+	        		try{	        		
+	            		socketInfo.socket.emit('end');	
+	            		socketInfo.socket.end();
+	        		}catch(e){
+
+	        		}
+	        		
+	        		delete this.socketList[socketInfo.address];
+	        	}
+
+	        	if(socketInfo.status == 'alive'){
+	            	socketInfo.status = 'unknown';   	                 	
+	        		try{	        		
+	            		socketInfo.socket.write(message);
+
+	            		//   		socketInfo.socket.emit('end');	
+	            		// socketInfo.socket.end();
+	        		}catch(e){
+
+	        		}
+	        	}
+	        }
+
+	        setTimeout((function() {
+		        this.socketTimeout();
+	        }).bind(this), 5000);
+	    }
+
+	    this.setAlive = function(macAddress){
+	    	// console.log("Collector " + macAddress + " is alive.");
+	    	this.socketList[macAddress].status = 'alive';
+	    }
+
+	    this.setUnknown = function(macAddress){
+	    	this.socketList[macAddress].status = 'unknown';
+	    }
+	}
+
+
+	var socketController = new SocketController();
+	socketController.socketTimeout();
+
+
 	server.on('connection', function(socket) {
 		var address = socket.address();
-    	console.log("New connection from " + address.address + ":" + address.port);    	
+    	console.log("New connection from " + address.address + ":" + address.port);    	 	
 
 		socket.on('end', function() {
 			console.log('Client Disconnected');
@@ -90,7 +150,7 @@ module.exports = function(SocketIO, db){
 				var buffer = [];
 				buffer = data.slice(0, 8);
 				var size = parseInt(buffer);
-				console.log("Size of packet = " + size + " /  Size of data = " + data.length);
+				// console.log("Size of packet = " + size + " /  Size of data = " + data.length);
 
 				var jsonString = data.slice(8, data.length).toString();
 			 	message = JSON.parse(jsonString);
@@ -113,6 +173,14 @@ module.exports = function(SocketIO, db){
 					if(err) return err;
 
 					socket.CollectorMAC = clientInfo.macaddress;
+
+			    	var socketObject = {
+										'address': socket.CollectorMAC,
+										'socket': socket,
+										'status': 'alive'
+										};   
+
+					socketController.socketList[socketObject.address] = socketObject;
 
 					if(doc){
 						console.log('Collector MAC from Socket: ' + socket.CollectorMAC);
@@ -163,6 +231,15 @@ module.exports = function(SocketIO, db){
 				console.log("ACK : " + JSON.stringify(message));
 			}
 
+			if(message.type == "ACK-ALIVE"){
+				try{
+					var clientInfo = message.data;
+					socketController.setAlive(clientInfo.macaddress);
+				}catch(e){
+					console.log("Invalid MAC Address");
+				}
+			}
+
 			// DATA ONLY
 			// When the client sends data
 			if(message.type == "DATA"){
@@ -196,10 +273,16 @@ module.exports = function(SocketIO, db){
 					                // RFID collector_id -> Collectors[collector_name]
 
 									var rfidArray = message.data.datasummary.data;
+
+									var get_rfid = function(tag){
+										// return String(tag.applicationcode) + String(tag.identificationcode);
+										return String(tag.identificationcode);
+									}
+
 									for(var key in rfidArray){
 										var rfid = rfidArray[key];
 
-										tagged_fishes.getTaggedFishesByPitTagSpeciesIdInstutionIdHash(rfid.identificationcode, function(err, rfidtag_hash){
+										tagged_fishes.getTaggedFishesByPitTagSpeciesIdInstutionIdHash(get_rfid(rfid), function(err, rfidtag_hash){
 				                            
 											var rfiddata = new Object;
 											console.log("rfidtag_hash: " + JSON.stringify(rfidtag_hash));
@@ -207,7 +290,10 @@ module.exports = function(SocketIO, db){
 											console.log("species_hash: " + JSON.stringify(species_hash));
 											console.log("collectors_hash: " + JSON.stringify(collectors_hash));
 
-											var tagId = rfid.identificationcode;
+
+											// RFID TAG Format
+											// applicationcode + identificationcode
+											var tagId = get_rfid(rfid);
 											var tagInfo = rfidtag_hash[tagId];
 											console.log('tagId: '+ JSON.stringify(tagId) + ', tagInfo: ' + JSON.stringify(tagInfo));
 
@@ -266,7 +352,7 @@ module.exports = function(SocketIO, db){
 
 	var startServer = function(){
 		server.listen(8124, function() { //'listening' listener
-		  console.log('server bound');
+		  console.log('RT Server bound on port 8124');
 		});	
 	}
 	return {

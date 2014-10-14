@@ -999,12 +999,21 @@ function ContentHandler (db) {
 
                             for(var key in result) {
 
+                                var get_rfid = function(tag){
+                                    // return String(tag.applicationcode) + String(tag.identificationcode);
+                                    return String(tag.identificationcode);
+                                }
+
                                 try{                                
                                     // Institution ID from the collector that captured the PIT_TAG
                                     var institution_id = collectors_hash[result[key].macaddress].institution_id;
-                                    var species_id = tagged_fish_hash[result[key].identificationcode].species_id;
-                                    console.log('collectors_hash: '+JSON.stringify(collectors_hash));
-                                    console.log('institutions_hash: '+JSON.stringify(institutions_hash));
+                                    // var species_id = tagged_fish_hash[result[key].identificationcode].species_id;
+                                    var species_id = tagged_fish_hash[get_rfid(result[key])].species_id;
+                                    // console.log('tagged_fish_hash: '+JSON.stringify(tagged_fish_hash));
+                                    console.log("RFID_tag: " + get_rfid(result[key]));
+                                    // console.log('collectors_hash: '+JSON.stringify(collectors_hash));
+                                    // console.log('collectors_hash: '+JSON.stringify(collectors_hash));
+                                    // console.log('institutions_hash: '+JSON.stringify(institutions_hash));
 
                                     // If institution_id is null, the Institution is unknown
                                     if(institution_id){
@@ -1015,7 +1024,7 @@ function ContentHandler (db) {
                                     result[key].species_name = species_hash[species_id];
                                     result[key].collector_name = collectors_hash[result[key].macaddress].name;
                                 }catch(e) {
-                                    console.log("Error: " + JSON.stringify(result[key].identificationcode) + " not found.");
+                                    console.log("Error: " + JSON.stringify(get_rfid(result[key])) + " not found.");
 
                                     // If institution_id is null, the Institution is unknown
                                     if(institution_id){
