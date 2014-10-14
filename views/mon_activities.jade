@@ -49,6 +49,8 @@ block scripts
         });
 
         socket.on('rfiddata', function (data) {
+            console.log('Data: ', data.htmlRow);  
+
             var rowCount = $('#myTable tr').length;
             if(rowCount == 20){
                 $('#tableBody tr:last').remove();

@@ -51,7 +51,8 @@ function RFIDDataDAO(db) {
 				applicationcode: rfid.applicationcode,
 	            datetime: new Date(rfid.datetime),
 	            md5hash: data.datasummary.md5diggest,
-                macaddress: data.macaddress
+                macaddress: data.macaddress,
+                rfid_tag: String(rfid.applicationcode) + String(rfid.identificationcode)
 			};
 
 			RFIDData.insert(rfidData, function(err){
@@ -80,7 +81,8 @@ function RFIDDataDAO(db) {
                     identificationcode: rfid.identificationcode,
                     applicationcode: rfid.applicationcode,
                     datetime: new Date(rfid.datetime),
-                    md5hash: summaryArray[summary].datasummary.md5diggest
+                    md5hash: summaryArray[summary].datasummary.md5diggest,
+                    rfid_tag: String(rfid.applicationcode) + String(rfid.identificationcode)
                 };
 
                 RFIDData.insert(rfidData, function(err){

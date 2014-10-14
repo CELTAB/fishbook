@@ -273,10 +273,16 @@ module.exports = function(SocketIO, db){
 					                // RFID collector_id -> Collectors[collector_name]
 
 									var rfidArray = message.data.datasummary.data;
+
+									var get_rfid = function(tag){
+										// return String(tag.applicationcode) + String(tag.identificationcode);
+										return String(tag.identificationcode);
+									}
+
 									for(var key in rfidArray){
 										var rfid = rfidArray[key];
 
-										tagged_fishes.getTaggedFishesByPitTagSpeciesIdInstutionIdHash(rfid.identificationcode, function(err, rfidtag_hash){
+										tagged_fishes.getTaggedFishesByPitTagSpeciesIdInstutionIdHash(get_rfid(rfid), function(err, rfidtag_hash){
 				                            
 											var rfiddata = new Object;
 											console.log("rfidtag_hash: " + JSON.stringify(rfidtag_hash));
@@ -284,7 +290,10 @@ module.exports = function(SocketIO, db){
 											console.log("species_hash: " + JSON.stringify(species_hash));
 											console.log("collectors_hash: " + JSON.stringify(collectors_hash));
 
-											var tagId = rfid.identificationcode;
+
+											// RFID TAG Format
+											// applicationcode + identificationcode
+											var tagId = get_rfid(rfid);
 											var tagInfo = rfidtag_hash[tagId];
 											console.log('tagId: '+ JSON.stringify(tagId) + ', tagInfo: ' + JSON.stringify(tagInfo));
 

@@ -63,6 +63,11 @@ MongoClient.connect('mongodb://localhost:27017/rfidmonitor', function(err, db) {
 
     }
 
+    process.on('uncaughtException', function (err) {
+      console.error(err.stack);
+      console.log("Node NOT Exiting...");
+    });
+
     // Application routes
     routes(app, db);
 
